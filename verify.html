@@ -549,20 +549,36 @@
     // Find transaction hash by searching for AttestationSubmitted event
     async function findTransactionHash(attestationId) {
       try {
-        console.log('🔍 Searching transaction for attestationId:', attestationId);
+        // Normalize attestation ID (ensure it has 0x prefix)
+        const normalizedId = attestationId.startsWith('0x') ? attestationId : '0x' + attestationId;
         
-        // Try method 1: Get events without filter (more reliable)
+        console.log('🔍 Searching transaction for attestationId:', normalizedId);
+        
+        // Get current block
+        const latestBlock = await web3.eth.getBlockNumber();
+        const blocksToSearch = 50000; // Last ~50k blocks (~1-2 days on Polygon)
+        const fromBlock = Math.max(0, latestBlock - blocksToSearch);
+        
+        console.log(`📦 Searching blocks ${fromBlock} to ${latestBlock} (last ${blocksToSearch} blocks)`);
+        
+        // Get events from recent blocks only (prevents timeout)
         const allEvents = await attestationContract.getPastEvents('AttestationSubmitted', {
-          fromBlock: 0,
+          fromBlock: fromBlock,
           toBlock: 'latest'
         });
 
-        console.log(`📦 Found ${allEvents.length} total AttestationSubmitted events`);
+        console.log(`📋 Found ${allEvents.length} AttestationSubmitted events in range`);
 
-        // Manually filter for our attestationId
+        if (allEvents.length === 0) {
+          console.warn('⚠️ No events found in recent blocks. Attestation may be older.');
+          return null;
+        }
+
+        // Manually filter for our attestationId (normalize both for comparison)
         const matchingEvent = allEvents.find(event => {
-          const eventAttestationId = event.returnValues.attestationId;
-          return eventAttestationId.toLowerCase() === attestationId.toLowerCase();
+          const eventId = event.returnValues.attestationId;
+          const normalizedEventId = eventId.startsWith('0x') ? eventId : '0x' + eventId;
+          return normalizedEventId.toLowerCase() === normalizedId.toLowerCase();
         });
 
         if (matchingEvent) {
@@ -570,7 +586,9 @@
           return matchingEvent.transactionHash;
         }
         
-        console.warn('⚠️ No matching event found for attestationId:', attestationId);
+        console.warn('⚠️ No matching event found. Possible reasons:');
+        console.warn('   - Attestation is older than 50k blocks');
+        console.warn('   - Attestation ID is incorrect');
         return null;
       } catch (error) {
         console.error('❌ Error finding transaction hash:', error);
@@ -819,12 +837,18 @@
               View Transaction on Polygonscan
             </a>
           ` : `
-            <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}#events" target="_blank" class="btn">
-              View Contract Events on Polygonscan
-            </a>
-            <p style="color: #A1A1AA; font-size: 0.875rem; margin-top: 1rem;">
-              Transaction hash not found automatically. Check contract events.
-            </p>
+            <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+              <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}#events" target="_blank" class="btn">
+                View All Contract Events
+              </a>
+              <p style="color: #A1A1AA; font-size: 0.875rem; max-width: 500px;">
+                Transaction not found automatically (may be older than 50k blocks). 
+                Click above to view all events and search for:<br>
+                <code style="background: rgba(106, 90, 255, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all;">
+                  ${attestation.id}
+                </code>
+              </p>
+            </div>
           `}
         </div>
       `;
