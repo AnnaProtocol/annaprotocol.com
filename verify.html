@@ -528,7 +528,7 @@
           },
           agent,
           verification: {
-            passed: attestation.status === '1', // Status.Verified
+            passed: parseInt(attestation.status) === 1, // Status.Verified = 1
             score: attestation.consistencyScore,
             verifier: attestation.verifier,
             timestamp: attestation.verificationTime
@@ -590,7 +590,14 @@
 
           <div class="info-item">
             <div class="info-label">Categoria</div>
-            <div class="info-value">${attestation.category || 'N/A'}</div>
+            <div class="info-value">${(() => {
+              try {
+                const cat = JSON.parse(attestation.category);
+                return cat.document_type || attestation.category;
+              } catch {
+                return attestation.category || 'N/A';
+              }
+            })()}</div>
           </div>
 
           <div class="info-item">
@@ -598,6 +605,48 @@
             <div class="info-value">${formatDate(attestation.timestamp)}</div>
           </div>
         </div>
+
+        ${(() => {
+          try {
+            const metadata = JSON.parse(attestation.category);
+            if (metadata.external_id || metadata.client_name) {
+              return `
+                <div class="section-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                  </svg>
+                  Metadados
+                </div>
+
+                <div class="info-grid">
+                  ${metadata.external_id ? `
+                    <div class="info-item">
+                      <div class="info-label">ID Externo</div>
+                      <div class="info-value">${metadata.external_id}</div>
+                    </div>
+                  ` : ''}
+                  
+                  ${metadata.client_name ? `
+                    <div class="info-item">
+                      <div class="info-label">Cliente</div>
+                      <div class="info-value">${metadata.client_name}</div>
+                    </div>
+                  ` : ''}
+                  
+                  ${metadata.system_origin ? `
+                    <div class="info-item">
+                      <div class="info-label">Sistema</div>
+                      <div class="info-value">${metadata.system_origin}</div>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }
+            return '';
+          } catch {
+            return '';
+          }
+        })()}
 
         ${agent && agent.modelType ? `
           <div class="section-title">
