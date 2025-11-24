@@ -214,6 +214,34 @@
       cursor: not-allowed;
     }
 
+    .copy-btn {
+      background: rgba(177, 156, 255, 0.1);
+      border: 1px solid rgba(177, 156, 255, 0.3);
+      border-radius: 6px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #B19CFF;
+    }
+
+    .copy-btn:hover {
+      background: rgba(177, 156, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    .copy-btn.copied {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.5);
+      color: #4ade80;
+    }
+
     .back-link {
       position: fixed;
       top: 2rem;
@@ -360,7 +388,7 @@
       <div class="subtitle">Attestation Verification</div>
     </div>
 
-    <!-- SEARCH FIELD (shown when no hash in URL) -->
+    <!-- SEARCH FIELD -->
     <div id="search" style="display: none;">
       <div class="card">
         <div class="search-container">
@@ -440,6 +468,29 @@
     const IDENTITY_ABI = [{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentMetadata","outputs":[{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"string","name":"specialization","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
     let web3, attestationContract, identityContract;
+    let currentTxHash = null; // Store transaction hash
+
+    // Copy to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.currentTarget;
+        const originalHTML = btn.innerHTML;
+        
+        btn.classList.add('copied');
+        btn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = originalHTML;
+        }, 2000);
+      }).catch(err => {
+        alert('Error copying: ' + err);
+      });
+    }
 
     // Search attestation
     function buscarAttestation() {
@@ -496,6 +547,27 @@
       return date.toLocaleString('en-US');
     }
 
+    // Find transaction hash by searching for AttestationCreated event
+    async function findTransactionHash(attestationId) {
+      try {
+        // Get past events for AttestationCreated
+        const events = await attestationContract.getPastEvents('AttestationCreated', {
+          filter: { attestationId: attestationId },
+          fromBlock: 0,
+          toBlock: 'latest'
+        });
+
+        if (events && events.length > 0) {
+          return events[0].transactionHash;
+        }
+        
+        return null;
+      } catch (error) {
+        console.warn('Could not find transaction hash:', error);
+        return null;
+      }
+    }
+
     // Load attestation
     async function loadAttestation(attestationId) {
       try {
@@ -508,6 +580,9 @@
         if (attestation.agent === '0x0000000000000000000000000000000000000000') {
           throw new Error('Attestation not found');
         }
+
+        // Try to find transaction hash
+        currentTxHash = await findTransactionHash(attestationId);
 
         let agent = null;
         try {
@@ -580,7 +655,15 @@
 
           <div class="info-item">
             <div class="info-label">ID</div>
-            <div class="info-value hash-value">${attestation.id.slice(0, 10)}...${attestation.id.slice(-8)}</div>
+            <div class="info-value hash-value" style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
+              <span style="flex: 1;">${attestation.id.slice(0, 10)}...${attestation.id.slice(-8)}</span>
+              <button onclick="copyToClipboard('${attestation.id}')" class="copy-btn" title="Copy full ID">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div class="info-item">
@@ -721,9 +804,15 @@
         </div>
 
         <div style="margin-top: 2rem; text-align: center;">
-          <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}" target="_blank" class="btn">
-            View on Polygonscan
-          </a>
+          ${currentTxHash ? `
+            <a href="${CONFIG.EXPLORER}/tx/${currentTxHash}" target="_blank" class="btn">
+              View Transaction on Polygonscan
+            </a>
+          ` : `
+            <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}" target="_blank" class="btn">
+              View Contract on Polygonscan
+            </a>
+          `}
         </div>
       `;
 
