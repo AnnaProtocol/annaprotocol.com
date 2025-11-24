@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Verificar Attestation - ANNA Protocol</title>
+  <title>Attestation Verification - ANNΛ Protocol</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
@@ -247,7 +247,7 @@
       margin-bottom: 1rem;
     }
 
-    /* CAMPO DE BUSCA */
+    /* SEARCH FIELD */
     .search-container {
       text-align: center;
       padding: 3rem 2rem;
@@ -351,21 +351,21 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
     </svg>
-    Voltar
+    Back
   </a>
 
   <div class="container">
     <div class="header">
-      <div class="logo">ANNA</div>
-      <div class="subtitle">Verificação de Attestation</div>
+      <div class="logo">ANNΛ</div>
+      <div class="subtitle">Attestation Verification</div>
     </div>
 
-    <!-- CAMPO DE BUSCA (aparece quando não tem hash na URL) -->
+    <!-- SEARCH FIELD (shown when no hash in URL) -->
     <div id="search" style="display: none;">
       <div class="card">
         <div class="search-container">
-          <div class="search-title">🔍 Buscar Attestation</div>
-          <div class="search-subtitle">Digite o hash da attestation para verificar sua autenticidade</div>
+          <div class="search-title">🔍 Search Attestation</div>
+          <div class="search-subtitle">Enter the attestation hash to verify its authenticity.</div>
           
           <div class="search-input-group">
             <input 
@@ -376,16 +376,16 @@
               onkeypress="if(event.key==='Enter') buscarAttestation()"
             />
             <button onclick="buscarAttestation()" class="btn">
-              Verificar
+              Check
             </button>
           </div>
 
           <div class="search-examples">
-            <div class="search-examples-title">💡 Como usar</div>
+            <div class="search-examples-title">💡 How to use</div>
             <div class="search-examples-text">
-              • Cole o hash da attestation que você recebeu no certificado<br>
-              • O hash deve começar com "0x" seguido de caracteres hexadecimais<br>
-              • Você também pode acessar diretamente usando: <code style="color: #B19CFF;">?hash=0x...</code>
+              • Paste the attestation hash found in the certificate<br>
+              • The hash must start with "0x" followed by hexadecimal characters<br>
+              • You can also access directly using: <code style="color: #B19CFF;">?hash=0x...</code>
             </div>
           </div>
         </div>
@@ -397,12 +397,12 @@
       <div class="card">
         <div class="loading">
           <div class="spinner"></div>
-          <div>Carregando dados da blockchain...</div>
+          <div>Loading blockchain data...</div>
         </div>
       </div>
     </div>
 
-    <!-- ERRO -->
+    <!-- ERROR -->
     <div id="error" style="display: none;">
       <div class="card">
         <div class="error">
@@ -411,21 +411,21 @@
             <line x1="15" y1="9" x2="9" y2="15"/>
             <line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
-          <h3 style="margin-bottom: 0.5rem;">❌ Erro ao carregar</h3>
+          <h3 style="margin-bottom: 0.5rem;">❌ Error loading data</h3>
           <p id="error-message"></p>
           <button onclick="location.reload()" class="btn" style="margin-top: 1.5rem;">
-            Tentar novamente
+            Try again
           </button>
         </div>
       </div>
     </div>
 
-    <!-- CONTEÚDO -->
+    <!-- CONTENT -->
     <div id="content" class="card" style="display: none;"></div>
   </div>
 
   <script>
-    // Configuração
+    // Configuration
     const CONFIG = {
       RPC: 'https://rpc-amoy.polygon.technology/',
       EXPLORER: 'https://amoy.polygonscan.com',
@@ -441,25 +441,24 @@
 
     let web3, attestationContract, identityContract;
 
-    // Buscar attestation
+    // Search attestation
     function buscarAttestation() {
       const hash = document.getElementById('hashInput').value.trim();
       
       if (!hash) {
-        alert('Por favor, digite um hash');
+        alert('Please enter a hash');
         return;
       }
       
       if (!hash.startsWith('0x') || hash.length < 10) {
-        alert('Hash inválido. Deve começar com 0x');
+        alert('Invalid hash. It must start with 0x');
         return;
       }
 
-      // Redirecionar com o hash na URL
       window.location.href = `?hash=${hash}`;
     }
 
-    // Extrair hash da URL
+    // Extract hash from URL
     function getAttestationHash() {
       const urlParams = new URLSearchParams(window.location.search);
       const hashFromQuery = urlParams.get('hash');
@@ -471,7 +470,7 @@
       return match ? match[1] : null;
     }
 
-    // Inicializar Web3
+    // Initialize Web3
     async function initWeb3() {
       try {
         web3 = new Web3(CONFIG.RPC);
@@ -479,46 +478,42 @@
         identityContract = new web3.eth.Contract(IDENTITY_ABI, CONFIG.CONTRACTS.AnnaIdentity);
         return true;
       } catch (error) {
-        console.error("Erro ao inicializar Web3:", error);
+        console.error("Error initializing Web3:", error);
         return false;
       }
     }
 
-    // Formatar endereço
+    // Format address
     function formatAddress(addr) {
       if (!addr) return 'N/A';
       return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
     }
 
-    // Formatar data
+    // Format date
     function formatDate(timestamp) {
       if (!timestamp) return 'N/A';
       const date = new Date(parseInt(timestamp) * 1000);
-      return date.toLocaleString('pt-BR');
+      return date.toLocaleString('en-US');
     }
 
-    // Carregar attestation
+    // Load attestation
     async function loadAttestation(attestationId) {
       try {
-        // Garantir que tem 0x no início
         if (!attestationId.startsWith('0x')) {
           attestationId = '0x' + attestationId;
         }
 
-        // Buscar attestation diretamente pelo ID
         const attestation = await attestationContract.methods.getAttestation(attestationId).call();
         
-        // Verificar se existe
         if (attestation.agent === '0x0000000000000000000000000000000000000000') {
-          throw new Error('Attestation não encontrada');
+          throw new Error('Attestation not found');
         }
 
-        // Buscar agente
         let agent = null;
         try {
           agent = await identityContract.methods.agentMetadata(attestation.agent).call();
         } catch (e) {
-          console.warn('Erro ao buscar agente:', e);
+          console.warn('Error fetching agent metadata:', e);
         }
 
         return {
@@ -528,19 +523,19 @@
           },
           agent,
           verification: {
-            passed: parseInt(attestation.status) === 1, // Status.Verified = 1
+            passed: parseInt(attestation.status) === 1,
             score: attestation.consistencyScore,
             verifier: attestation.verifier,
             timestamp: attestation.verificationTime
           }
         };
       } catch (error) {
-        console.error("Erro ao buscar attestation:", error);
+        console.error("Error loading attestation:", error);
         throw error;
       }
     }
 
-    // Renderizar conteúdo
+    // Render content
     function renderContent(data) {
       const { attestation, agent, verification } = data;
       
@@ -552,14 +547,14 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 6L9 17l-5-5"/>
               </svg>
-              Verificado
+              Verified
             </span>
           `;
         } else {
-          statusBadge = `<span class="status-badge status-failed">❌ Reprovado</span>`;
+          statusBadge = `<span class="status-badge status-failed">❌ Failed</span>`;
         }
       } else {
-        statusBadge = `<span class="status-badge status-pending">⏳ Pendente</span>`;
+        statusBadge = `<span class="status-badge status-pending">⏳ Pending</span>`;
       }
 
       const content = `
@@ -574,7 +569,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
-          Informações da Attestation
+          Attestation Information
         </div>
 
         <div class="info-grid">
@@ -589,7 +584,7 @@
           </div>
 
           <div class="info-item">
-            <div class="info-label">Categoria</div>
+            <div class="info-label">Category</div>
             <div class="info-value">${(() => {
               try {
                 const cat = JSON.parse(attestation.category);
@@ -601,7 +596,7 @@
           </div>
 
           <div class="info-item">
-            <div class="info-label">Data</div>
+            <div class="info-label">Date</div>
             <div class="info-value">${formatDate(attestation.timestamp)}</div>
           </div>
         </div>
@@ -615,27 +610,27 @@
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                   </svg>
-                  Metadados
+                  Metadata
                 </div>
 
                 <div class="info-grid">
                   ${metadata.external_id ? `
                     <div class="info-item">
-                      <div class="info-label">ID Externo</div>
+                      <div class="info-label">External ID</div>
                       <div class="info-value">${metadata.external_id}</div>
                     </div>
                   ` : ''}
                   
                   ${metadata.client_name ? `
                     <div class="info-item">
-                      <div class="info-label">Cliente</div>
+                      <div class="info-label">Client</div>
                       <div class="info-value">${metadata.client_name}</div>
                     </div>
                   ` : ''}
                   
                   ${metadata.system_origin ? `
                     <div class="info-item">
-                      <div class="info-label">Sistema</div>
+                      <div class="info-label">System</div>
                       <div class="info-value">${metadata.system_origin}</div>
                     </div>
                   ` : ''}
@@ -653,22 +648,22 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M12.5 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
-            Agente de IA
+            AI Agent
           </div>
 
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">Modelo</div>
+              <div class="info-label">Model</div>
               <div class="info-value">${agent.modelType || 'N/A'}</div>
             </div>
 
             <div class="info-item">
-              <div class="info-label">Versão</div>
+              <div class="info-label">Version</div>
               <div class="info-value">${agent.modelVersion || 'N/A'}</div>
             </div>
 
             <div class="info-item">
-              <div class="info-label">Endereço</div>
+              <div class="info-label">Address</div>
               <div class="info-value">
                 <a href="${CONFIG.EXPLORER}/address/${attestation.agent}" target="_blank" style="color: #B19CFF; text-decoration: none;">
                   ${formatAddress(attestation.agent)}
@@ -683,17 +678,17 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Resultado da Verificação
+            Verification Result
           </div>
 
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">Pontuação</div>
+              <div class="info-label">Score</div>
               <div class="info-value">${verification.score}/100</div>
             </div>
 
             <div class="info-item">
-              <div class="info-label">Verificador</div>
+              <div class="info-label">Verifier</div>
               <div class="info-value">
                 <a href="${CONFIG.EXPLORER}/address/${verification.verifier}" target="_blank" style="color: #B19CFF; text-decoration: none;">
                   ${formatAddress(verification.verifier)}
@@ -702,7 +697,7 @@
             </div>
 
             <div class="info-item">
-              <div class="info-label">Data da Verificação</div>
+              <div class="info-label">Verification Date</div>
               <div class="info-value">${formatDate(verification.timestamp)}</div>
             </div>
           </div>
@@ -712,7 +707,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
           </svg>
-          Hashes Criptográficos
+          Cryptographic Hashes
         </div>
 
         <div class="info-item">
@@ -727,7 +722,7 @@
 
         <div style="margin-top: 2rem; text-align: center;">
           <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}" target="_blank" class="btn">
-            Ver no Polygonscan
+            View on Polygonscan
           </a>
         </div>
       `;
@@ -737,29 +732,27 @@
       document.getElementById('loading').style.display = 'none';
     }
 
-    // Mostrar erro
+    // Show error
     function showError(message) {
       document.getElementById('error-message').textContent = message;
       document.getElementById('error').style.display = 'block';
       document.getElementById('loading').style.display = 'none';
     }
 
-    // Inicializar
+    // Initialize
     async function init() {
       const hash = getAttestationHash();
       
-      // Se não tem hash, mostrar campo de busca
       if (!hash) {
         document.getElementById('search').style.display = 'block';
         return;
       }
 
-      // Se tem hash, carregar a attestation
       document.getElementById('loading').style.display = 'block';
 
       const web3Ready = await initWeb3();
       if (!web3Ready) {
-        showError('Erro ao conectar à blockchain. Tente novamente mais tarde.');
+        showError('Error connecting to the blockchain. Try again later.');
         return;
       }
 
@@ -767,11 +760,11 @@
         const data = await loadAttestation(hash);
         renderContent(data);
       } catch (error) {
-        showError(`Erro ao carregar attestation: ${error.message}`);
+        showError(`Error loading attestation: ${error.message}`);
       }
     }
 
-    // Three.js background (mesmo do site principal)
+    // Background animation
     (function(){
       const canvas = document.getElementById('bgCanvas');
       const scene = new THREE.Scene();
@@ -831,7 +824,6 @@
       animate();
     })();
 
-    // Iniciar quando a página carregar
     window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
