@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Verificar Attestation - ANNA Protocol</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
@@ -201,11 +200,18 @@
       transition: all 0.3s ease;
       border: none;
       cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
     }
 
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 30px rgba(106, 90, 255, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .back-link {
@@ -241,28 +247,82 @@
       margin-bottom: 1rem;
     }
 
-    .reasoning-box {
+    /* CAMPO DE BUSCA */
+    .search-container {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .search-title {
+      color: #B19CFF;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .search-subtitle {
+      color: #A1A1AA;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-input-group {
+      display: flex;
+      gap: 1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 300px;
+      padding: 1rem 1.5rem;
       background: rgba(177, 156, 255, 0.05);
+      border: 2px solid rgba(177, 156, 255, 0.2);
+      border-radius: 12px;
+      color: #E5E5F0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #B19CFF;
+      background: rgba(177, 156, 255, 0.08);
+    }
+
+    .search-input::placeholder {
+      color: #666;
+    }
+
+    .search-examples {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(177, 156, 255, 0.03);
       border: 1px solid rgba(177, 156, 255, 0.1);
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-      max-height: 400px;
-      overflow-y: auto;
+      text-align: left;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .reasoning-step {
-      color: #E5E5F0;
-      margin-bottom: 0.75rem;
-      padding-left: 1.5rem;
-      position: relative;
-    }
-
-    .reasoning-step:before {
-      content: "→";
-      position: absolute;
-      left: 0;
+    .search-examples-title {
       color: #B19CFF;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .search-examples-text {
+      color: #A1A1AA;
+      font-size: 0.875rem;
+      line-height: 1.6;
     }
 
     @media (max-width: 768px) {
@@ -273,115 +333,154 @@
       .info-grid {
         grid-template-columns: 1fr;
       }
+
+      .search-input-group {
+        flex-direction: column;
+      }
+
+      .search-input {
+        width: 100%;
+      }
     }
   </style>
 </head>
-
 <body>
   <canvas id="bgCanvas"></canvas>
-
+  
   <a href="/" class="back-link">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M19 12H5M12 19l-7-7 7-7"/>
     </svg>
-    Voltar ao site
+    Voltar
   </a>
 
   <div class="container">
     <div class="header">
-      <div class="logo">A N N Λ</div>
-      <div class="subtitle">Protocol - Verificação de Attestation</div>
+      <div class="logo">ANNA</div>
+      <div class="subtitle">Verificação de Attestation</div>
     </div>
 
-    <div class="card">
-      <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <div>Carregando attestation da blockchain...</div>
-      </div>
+    <!-- CAMPO DE BUSCA (aparece quando não tem hash na URL) -->
+    <div id="search" style="display: none;">
+      <div class="card">
+        <div class="search-container">
+          <div class="search-title">🔍 Buscar Attestation</div>
+          <div class="search-subtitle">Digite o hash da attestation para verificar sua autenticidade</div>
+          
+          <div class="search-input-group">
+            <input 
+              type="text" 
+              id="hashInput" 
+              class="search-input"
+              placeholder="0x123456789abcdef..."
+              onkeypress="if(event.key==='Enter') buscarAttestation()"
+            />
+            <button onclick="buscarAttestation()" class="btn">
+              Verificar
+            </button>
+          </div>
 
-      <div id="error" class="error" style="display: none;">
-        <h3 style="margin-bottom: 1rem;">❌ Erro ao carregar</h3>
-        <p id="error-message"></p>
-        <button class="btn" onclick="location.reload()" style="margin-top: 1.5rem;">Tentar novamente</button>
-      </div>
-
-      <div id="content" style="display: none;">
-        <!-- Conteúdo será inserido dinamicamente -->
+          <div class="search-examples">
+            <div class="search-examples-title">💡 Como usar</div>
+            <div class="search-examples-text">
+              • Cole o hash da attestation que você recebeu no certificado<br>
+              • O hash deve começar com "0x" seguido de caracteres hexadecimais<br>
+              • Você também pode acessar diretamente usando: <code style="color: #B19CFF;">?hash=0x...</code>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- LOADING -->
+    <div id="loading" style="display: none;">
+      <div class="card">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>Carregando dados da blockchain...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERRO -->
+    <div id="error" style="display: none;">
+      <div class="card">
+        <div class="error">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 1rem;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <h3 style="margin-bottom: 0.5rem;">❌ Erro ao carregar</h3>
+          <p id="error-message"></p>
+          <button onclick="location.reload()" class="btn" style="margin-top: 1.5rem;">
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div id="content" class="card" style="display: none;"></div>
   </div>
 
   <script>
-    // Configuração dos contratos
+    // Configuração
     const CONFIG = {
+      RPC: 'https://rpc-amoy.polygon.technology/',
+      EXPLORER: 'https://amoy.polygonscan.com',
       CONTRACTS: {
-        AnnaAttestation: "0xEd98b7Ed960924cEf4d5dfF174252CE88DeCb4e8",
-        AnnaReputation: "0x5CF18F2eDCB198D4D420ae587Da01035fFfE7172",
-        AnnaIdentity: "0x8b9b5D3f698BE53Ae98162f6e013Bc9214bc7AF0"
-      },
-      RPC_URL: "https://rpc-amoy.polygon.technology/",
-      EXPLORER: "https://amoy.polygonscan.com"
+        AnnaAttestation: '0x8BeD6F60560AEAbCb201A3f84E16830d3fDDA084',
+        AnnaIdentity: '0xe0Ea79B712fB83ee8A8BD8dCb3c6F1cE39aB0A93',
+        AnnaReputation: '0xa71C80fB861AA96bE92098e0c50f5BFEd3Bd5D6F'
+      }
     };
 
-    // ABIs simplificados
-    const ATTESTATION_ABI = [
-      {
-        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "name": "attestations",
-        "outputs": [
-          {"internalType": "uint256", "name": "id", "type": "uint256"},
-          {"internalType": "uint256", "name": "agentId", "type": "uint256"},
-          {"internalType": "bytes32", "name": "contentHash", "type": "bytes32"},
-          {"internalType": "bytes32", "name": "reasoningHash", "type": "bytes32"},
-          {"internalType": "string", "name": "category", "type": "string"},
-          {"internalType": "uint256", "name": "timestamp", "type": "uint256"},
-          {"internalType": "enum AnnaAttestation.ServiceTier", "name": "tier", "type": "uint8"}
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ];
+    const ATTESTATION_ABI = [{"inputs":[{"internalType":"address","name":"_identityContract","type":"address"},{"internalType":"address","name":"_reputationContract","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"bytes32","name":"agentId","type":"bytes32"},{"indexed":false,"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"agentAttestations","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"attestations","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"bytes32","name":"agentId","type":"bytes32"},{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"string","name":"category","type":"string"},{"internalType":"string","name":"metadata","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"string","name":"category","type":"string"},{"internalType":"string","name":"metadata","type":"string"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"submitAttestation","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}];
 
-    const REPUTATION_ABI = [
-      {
-        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "name": "verifications",
-        "outputs": [
-          {"internalType": "uint256", "name": "attestationId", "type": "uint256"},
-          {"internalType": "address", "name": "verifier", "type": "address"},
-          {"internalType": "bool", "name": "passed", "type": "bool"},
-          {"internalType": "uint256", "name": "score", "type": "uint256"},
-          {"internalType": "uint256", "name": "timestamp", "type": "uint256"}
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ];
+    const IDENTITY_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"agentId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agentAddress","type":"address"},{"indexed":false,"internalType":"string","name":"did","type":"string"}],"name":"AgentRegistered","type":"event"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentIdByAddress","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"agents","outputs":[{"internalType":"bytes32","name":"agentId","type":"bytes32"},{"internalType":"address","name":"agentAddress","type":"address"},{"internalType":"string","name":"did","type":"string"},{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"},{"internalType":"bool","name":"isActive","type":"bool"}],"stateMutability":"view","type":"function"}];
 
-    const IDENTITY_ABI = [
-      {
-        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "name": "agents",
-        "outputs": [
-          {"internalType": "address", "name": "agentAddress", "type": "address"},
-          {"internalType": "string", "name": "did", "type": "string"},
-          {"internalType": "string", "name": "modelType", "type": "string"},
-          {"internalType": "uint256", "name": "registrationTime", "type": "uint256"}
-        ],
-        "stateMutability": "view",
-        "type": "function"
+    const REPUTATION_ABI = [{"inputs":[{"internalType":"address","name":"_attestationContract","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"agentId","type":"bytes32"},{"indexed":false,"internalType":"uint256","name":"newScore","type":"uint256"}],"name":"ReputationUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"attestationId","type":"uint256"},{"indexed":true,"internalType":"address","name":"verifier","type":"address"},{"indexed":false,"internalType":"bool","name":"passed","type":"bool"}],"name":"VerificationCompleted","type":"event"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"reputationScore","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"attestationId","type":"uint256"},{"internalType":"bool","name":"passed","type":"bool"},{"internalType":"uint8","name":"score","type":"uint8"}],"name":"verifyAttestation","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"verifications","outputs":[{"internalType":"uint256","name":"attestationId","type":"uint256"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"bool","name":"passed","type":"bool"},{"internalType":"uint8","name":"score","type":"uint8"},{"internalType":"uint256","name":"timestamp","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+    let web3, attestationContract, identityContract, reputationContract;
+
+    // Buscar attestation
+    function buscarAttestation() {
+      const hash = document.getElementById('hashInput').value.trim();
+      
+      if (!hash) {
+        alert('Por favor, digite um hash');
+        return;
       }
-    ];
+      
+      if (!hash.startsWith('0x') || hash.length < 10) {
+        alert('Hash inválido. Deve começar com 0x');
+        return;
+      }
+
+      // Redirecionar com o hash na URL
+      window.location.href = `?hash=${hash}`;
+    }
+
+    // Extrair hash da URL
+    function getAttestationHash() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashFromQuery = urlParams.get('hash');
+      
+      if (hashFromQuery) return hashFromQuery;
+      
+      const path = window.location.pathname;
+      const match = path.match(/\/verify\/(0x[a-fA-F0-9]+)/);
+      return match ? match[1] : null;
+    }
 
     // Inicializar Web3
-    let web3, attestationContract, reputationContract, identityContract;
-
     async function initWeb3() {
       try {
-        web3 = new Web3(CONFIG.RPC_URL);
+        web3 = new Web3(CONFIG.RPC);
         attestationContract = new web3.eth.Contract(ATTESTATION_ABI, CONFIG.CONTRACTS.AnnaAttestation);
-        reputationContract = new web3.eth.Contract(REPUTATION_ABI, CONFIG.CONTRACTS.AnnaReputation);
         identityContract = new web3.eth.Contract(IDENTITY_ABI, CONFIG.CONTRACTS.AnnaIdentity);
+        reputationContract = new web3.eth.Contract(REPUTATION_ABI, CONFIG.CONTRACTS.AnnaReputation);
         return true;
       } catch (error) {
         console.error("Erro ao inicializar Web3:", error);
@@ -389,53 +488,50 @@
       }
     }
 
-    // Pegar o hash da URL
-    function getAttestationHash() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const hash = urlParams.get('hash');
-      
-      if (!hash) {
-        // Tentar pegar do path /verify/0x...
-        const path = window.location.pathname;
-        const match = path.match(/\/verify\/(0x[a-fA-F0-9]{64})/);
-        if (match) {
-          return match[1];
-        }
-      }
-      
-      return hash;
-    }
-
-    // Converter timestamp para data legível
-    function formatDate(timestamp) {
-      const date = new Date(timestamp * 1000);
-      return date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
     // Formatar endereço
-    function formatAddress(address) {
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    function formatAddress(addr) {
+      if (!addr) return 'N/A';
+      return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
     }
 
-    // Buscar attestation do blockchain
-    async function loadAttestation(hash) {
+    // Formatar data
+    function formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      const date = new Date(parseInt(timestamp) * 1000);
+      return date.toLocaleString('pt-BR');
+    }
+
+    // Carregar attestation
+    async function loadAttestation(contentHash) {
       try {
-        // Por enquanto, vamos buscar pelo ID (simplificado)
-        // Em produção, você precisaria de um mapping hash->id no contrato
-        // ou buscar através de eventos
+        // Buscar attestation por content hash
+        let attestationId = null;
+        let attestation = null;
         
-        // Exemplo: assumindo que o último dígito do hash pode ser usado como ID
-        // Isso é apenas para demonstração - você precisa implementar a lógica real
-        const attestationId = 1; // FIXME: implementar busca real por hash
-        
-        const attestation = await attestationContract.methods.attestations(attestationId).call();
-        
+        // Tentar buscar pelo ID diretamente se for um número
+        if (!contentHash.startsWith('0x')) {
+          attestationId = parseInt(contentHash);
+        } else {
+          // Buscar todas as attestations (método simples)
+          // Em produção, você deveria ter um evento ou mapping por hash
+          for (let i = 1; i <= 1000; i++) {
+            try {
+              const att = await attestationContract.methods.attestations(i).call();
+              if (att.contentHash.toLowerCase() === contentHash.toLowerCase()) {
+                attestationId = i;
+                attestation = att;
+                break;
+              }
+            } catch (e) {
+              break; // Chegou no final
+            }
+          }
+        }
+
+        if (!attestation && attestationId) {
+          attestation = await attestationContract.methods.attestations(attestationId).call();
+        }
+
         if (!attestation || attestation.id === '0') {
           throw new Error('Attestation não encontrada');
         }
@@ -451,7 +547,7 @@
         // Buscar verificação
         let verification = null;
         try {
-          verification = await reputationContract.methods.verifications(attestationId).call();
+          verification = await reputationContract.methods.verifications(attestation.id).call();
         } catch (e) {
           console.warn('Erro ao buscar verificação:', e);
         }
@@ -472,7 +568,7 @@
       const { attestation, agent, verification } = data;
       
       let statusBadge = '';
-      if (verification) {
+      if (verification && verification.attestationId !== '0') {
         if (verification.passed) {
           statusBadge = `
             <span class="status-badge status-verified">
@@ -526,7 +622,7 @@
           </div>
         </div>
 
-        ${agent ? `
+        ${agent && agent.agentId !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? `
           <div class="section-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M12.5 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -556,7 +652,7 @@
           </div>
         ` : ''}
 
-        ${verification ? `
+        ${verification && verification.attestationId !== '0' ? `
           <div class="section-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -626,10 +722,14 @@
     async function init() {
       const hash = getAttestationHash();
       
+      // Se não tem hash, mostrar campo de busca
       if (!hash) {
-        showError('Hash da attestation não fornecido na URL. Use: ?hash=0x... ou /verify/0x...');
+        document.getElementById('search').style.display = 'block';
         return;
       }
+
+      // Se tem hash, carregar a attestation
+      document.getElementById('loading').style.display = 'block';
 
       const web3Ready = await initWeb3();
       if (!web3Ready) {
