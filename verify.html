@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verificar Attestation - ANNA Protocol</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #03010A;
+      --violet: #B19CFF;
+      --indigo: #6A5AFF;
+      --muted: #A1A1AA;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: clamp(32px, 5vw, 60px);
+      letter-spacing: 0.12em;
+      background: linear-gradient(90deg, #bba8ff, #7b5ffb, #bba8ff);
+      background-size: 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 6s linear infinite;
+      margin-bottom: 0.5rem;
+    }
+
+    @keyframes shine {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .subtitle {
+      color: #CFCBFF;
+      font-size: clamp(12px, 1.2vw, 16px);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0.8;
+    }
+
+    .card {
+      background: rgba(15, 8, 35, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(177, 156, 255, 0.15);
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(177, 156, 255, 0.1);
+    }
+
+    .section-title {
+      color: #B19CFF;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-item {
+      background: rgba(177, 156, 255, 0.05);
+      border: 1px solid rgba(177, 156, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .info-label {
+      color: #A1A1AA;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+      color: #E5E5F0;
+      font-size: 1rem;
+      word-break: break-word;
+      font-weight: 500;
+    }
+
+    .hash-value {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      background: rgba(106, 90, 255, 0.1);
+      padding: 0.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .status-verified {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 3rem;
+      color: #B19CFF;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(177, 156, 255, 0.1);
+      border-top-color: #B19CFF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #ef4444;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6A5AFF, #B19CFF);
+      color: white;
+      padding: 0.875rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(106, 90, 255, 0.3);
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      color: #B19CFF;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      z-index: 20;
+    }
+
+    .back-link:hover {
+      color: #CFCBFF;
+      transform: translateX(-4px);
+    }
+
+    .blockchain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(130, 71, 229, 0.15);
+      border: 1px solid rgba(130, 71, 229, 0.3);
+      border-radius: 999px;
+      color: #a78bfa;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .reasoning-box {
+      background: rgba(177, 156, 255, 0.05);
+      border: 1px solid rgba(177, 156, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .reasoning-step {
+      color: #E5E5F0;
+      margin-bottom: 0.75rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .reasoning-step:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #B19CFF;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 1.5rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <a href="/" class="back-link">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Voltar ao site
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">A N N Λ</div>
+      <div class="subtitle">Protocol - Verificação de Attestation</div>
+    </div>
+
+    <div class="card">
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div>Carregando attestation da blockchain...</div>
+      </div>
+
+      <div id="error" class="error" style="display: none;">
+        <h3 style="margin-bottom: 1rem;">❌ Erro ao carregar</h3>
+        <p id="error-message"></p>
+        <button class="btn" onclick="location.reload()" style="margin-top: 1.5rem;">Tentar novamente</button>
+      </div>
+
+      <div id="content" style="display: none;">
+        <!-- Conteúdo será inserido dinamicamente -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuração dos contratos
+    const CONFIG = {
+      CONTRACTS: {
+        AnnaAttestation: "0xEd98b7Ed960924cEf4d5dfF174252CE88DeCb4e8",
+        AnnaReputation: "0x5CF18F2eDCB198D4D420ae587Da01035fFfE7172",
+        AnnaIdentity: "0x8b9b5D3f698BE53Ae98162f6e013Bc9214bc7AF0"
+      },
+      RPC_URL: "https://rpc-amoy.polygon.technology/",
+      EXPLORER: "https://amoy.polygonscan.com"
+    };
+
+    // ABIs simplificados
+    const ATTESTATION_ABI = [
+      {
+        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "attestations",
+        "outputs": [
+          {"internalType": "uint256", "name": "id", "type": "uint256"},
+          {"internalType": "uint256", "name": "agentId", "type": "uint256"},
+          {"internalType": "bytes32", "name": "contentHash", "type": "bytes32"},
+          {"internalType": "bytes32", "name": "reasoningHash", "type": "bytes32"},
+          {"internalType": "string", "name": "category", "type": "string"},
+          {"internalType": "uint256", "name": "timestamp", "type": "uint256"},
+          {"internalType": "enum AnnaAttestation.ServiceTier", "name": "tier", "type": "uint8"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    const REPUTATION_ABI = [
+      {
+        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "verifications",
+        "outputs": [
+          {"internalType": "uint256", "name": "attestationId", "type": "uint256"},
+          {"internalType": "address", "name": "verifier", "type": "address"},
+          {"internalType": "bool", "name": "passed", "type": "bool"},
+          {"internalType": "uint256", "name": "score", "type": "uint256"},
+          {"internalType": "uint256", "name": "timestamp", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    const IDENTITY_ABI = [
+      {
+        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "agents",
+        "outputs": [
+          {"internalType": "address", "name": "agentAddress", "type": "address"},
+          {"internalType": "string", "name": "did", "type": "string"},
+          {"internalType": "string", "name": "modelType", "type": "string"},
+          {"internalType": "uint256", "name": "registrationTime", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    // Inicializar Web3
+    let web3, attestationContract, reputationContract, identityContract;
+
+    async function initWeb3() {
+      try {
+        web3 = new Web3(CONFIG.RPC_URL);
+        attestationContract = new web3.eth.Contract(ATTESTATION_ABI, CONFIG.CONTRACTS.AnnaAttestation);
+        reputationContract = new web3.eth.Contract(REPUTATION_ABI, CONFIG.CONTRACTS.AnnaReputation);
+        identityContract = new web3.eth.Contract(IDENTITY_ABI, CONFIG.CONTRACTS.AnnaIdentity);
+        return true;
+      } catch (error) {
+        console.error("Erro ao inicializar Web3:", error);
+        return false;
+      }
+    }
+
+    // Pegar o hash da URL
+    function getAttestationHash() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = urlParams.get('hash');
+      
+      if (!hash) {
+        // Tentar pegar do path /verify/0x...
+        const path = window.location.pathname;
+        const match = path.match(/\/verify\/(0x[a-fA-F0-9]{64})/);
+        if (match) {
+          return match[1];
+        }
+      }
+      
+      return hash;
+    }
+
+    // Converter timestamp para data legível
+    function formatDate(timestamp) {
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Formatar endereço
+    function formatAddress(address) {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
+
+    // Buscar attestation do blockchain
+    async function loadAttestation(hash) {
+      try {
+        // Por enquanto, vamos buscar pelo ID (simplificado)
+        // Em produção, você precisaria de um mapping hash->id no contrato
+        // ou buscar através de eventos
+        
+        // Exemplo: assumindo que o último dígito do hash pode ser usado como ID
+        // Isso é apenas para demonstração - você precisa implementar a lógica real
+        const attestationId = 1; // FIXME: implementar busca real por hash
+        
+        const attestation = await attestationContract.methods.attestations(attestationId).call();
+        
+        if (!attestation || attestation.id === '0') {
+          throw new Error('Attestation não encontrada');
+        }
+
+        // Buscar agente
+        let agent = null;
+        try {
+          agent = await identityContract.methods.agents(attestation.agentId).call();
+        } catch (e) {
+          console.warn('Erro ao buscar agente:', e);
+        }
+
+        // Buscar verificação
+        let verification = null;
+        try {
+          verification = await reputationContract.methods.verifications(attestationId).call();
+        } catch (e) {
+          console.warn('Erro ao buscar verificação:', e);
+        }
+
+        return {
+          attestation,
+          agent,
+          verification
+        };
+      } catch (error) {
+        console.error("Erro ao buscar attestation:", error);
+        throw error;
+      }
+    }
+
+    // Renderizar conteúdo
+    function renderContent(data) {
+      const { attestation, agent, verification } = data;
+      
+      let statusBadge = '';
+      if (verification) {
+        if (verification.passed) {
+          statusBadge = `
+            <span class="status-badge status-verified">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+              Verificado
+            </span>
+          `;
+        } else {
+          statusBadge = `<span class="status-badge status-failed">❌ Reprovado</span>`;
+        }
+      } else {
+        statusBadge = `<span class="status-badge status-pending">⏳ Pendente</span>`;
+      }
+
+      const content = `
+        <div class="blockchain-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          Polygon Amoy Testnet
+        </div>
+
+        <div class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Informações da Attestation
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value">${statusBadge}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">ID</div>
+            <div class="info-value">#${attestation.id}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Categoria</div>
+            <div class="info-value">${attestation.category || 'N/A'}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Data</div>
+            <div class="info-value">${formatDate(attestation.timestamp)}</div>
+          </div>
+        </div>
+
+        ${agent ? `
+          <div class="section-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M12.5 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            Agente de IA
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">DID</div>
+              <div class="info-value hash-value">${agent.did || 'N/A'}</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Modelo</div>
+              <div class="info-value">${agent.modelType || 'N/A'}</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Endereço</div>
+              <div class="info-value">
+                <a href="${CONFIG.EXPLORER}/address/${agent.agentAddress}" target="_blank" style="color: #B19CFF; text-decoration: none;">
+                  ${formatAddress(agent.agentAddress)}
+                </a>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        ${verification ? `
+          <div class="section-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Resultado da Verificação
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Pontuação</div>
+              <div class="info-value">${verification.score}/100</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Verificador</div>
+              <div class="info-value">
+                <a href="${CONFIG.EXPLORER}/address/${verification.verifier}" target="_blank" style="color: #B19CFF; text-decoration: none;">
+                  ${formatAddress(verification.verifier)}
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Data da Verificação</div>
+              <div class="info-value">${formatDate(verification.timestamp)}</div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+          </svg>
+          Hashes Criptográficos
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Content Hash</div>
+          <div class="info-value hash-value">${attestation.contentHash}</div>
+        </div>
+
+        <div class="info-item" style="margin-top: 1rem;">
+          <div class="info-label">Reasoning Hash</div>
+          <div class="info-value hash-value">${attestation.reasoningHash}</div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+          <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}" target="_blank" class="btn">
+            Ver no Polygonscan
+          </a>
+        </div>
+      `;
+
+      document.getElementById('content').innerHTML = content;
+      document.getElementById('content').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // Mostrar erro
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // Inicializar
+    async function init() {
+      const hash = getAttestationHash();
+      
+      if (!hash) {
+        showError('Hash da attestation não fornecido na URL. Use: ?hash=0x... ou /verify/0x...');
+        return;
+      }
+
+      const web3Ready = await initWeb3();
+      if (!web3Ready) {
+        showError('Erro ao conectar à blockchain. Tente novamente mais tarde.');
+        return;
+      }
+
+      try {
+        const data = await loadAttestation(hash);
+        renderContent(data);
+      } catch (error) {
+        showError(`Erro ao carregar attestation: ${error.message}`);
+      }
+    }
+
+    // Three.js background (mesmo do site principal)
+    (function(){
+      const canvas = document.getElementById('bgCanvas');
+      const scene = new THREE.Scene();
+      const clock = new THREE.Clock();
+      const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 1, 2000);
+      camera.position.z = 420;
+      
+      function resize(){
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const PARTICLE_COUNT = 150, MAX_DIST = 120;
+      const positions = new Float32Array(PARTICLE_COUNT * 3);
+      const basePositions = [], velocities = [];
+      
+      for(let i=0;i<PARTICLE_COUNT;i++){
+        const x = (Math.random()-0.5)*420;
+        const y = (Math.random()-0.5)*240;
+        const z = (Math.random()-0.5)*240;
+        positions[i*3]=x; positions[i*3+1]=y; positions[i*3+2]=z;
+        basePositions.push(new THREE.Vector3(x,y,z));
+        velocities.push(new THREE.Vector3((Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02));
+      }
+
+      const pointsGeom = new THREE.BufferGeometry();
+      pointsGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const pointsMat = new THREE.PointsMaterial({color:0x9F8CFF,size:2.2,opacity:0.9,transparent:true});
+      const points = new THREE.Points(pointsGeom, pointsMat);
+      scene.add(points);
+
+      const tmpV=new THREE.Vector3();
+      function animate(){
+        const t=clock.getElapsedTime();
+        for(let i=0;i<PARTICLE_COUNT;i++){
+          const idx=i*3, base=basePositions[i];
+          tmpV.copy(base);
+          tmpV.x+=Math.sin(t*0.6+i)*6+velocities[i].x*40;
+          tmpV.y+=Math.cos(t*0.5+i*0.7)*5+velocities[i].y*40;
+          tmpV.z+=Math.sin(t*0.4+i*0.9)*6+velocities[i].z*40;
+          positions[idx]=tmpV.x;positions[idx+1]=tmpV.y;positions[idx+2]=tmpV.z;
+        }
+        pointsGeom.attributes.position.needsUpdate=true;
+
+        scene.rotation.y=Math.sin(t*0.05)*0.05;
+        camera.position.z=420+Math.sin(t*0.12)*8;
+        camera.lookAt(0,0,0);
+        renderer.render(scene,camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // Iniciar quando a página carregar
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

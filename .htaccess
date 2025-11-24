@@ -1,0 +1,13 @@
+# Habilitar rewrite
+RewriteEngine On
+
+# Redirecionar /verify/HASH para verify.html?hash=HASH
+RewriteRule ^verify/([0-9a-fA-Fx]+)$ /verify.html?hash=$1 [L,QSA]
+
+# Opcional: forçar HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Opcional: redirecionar www para não-www
+RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
