@@ -549,20 +549,31 @@
     // Find transaction hash by searching for AttestationSubmitted event
     async function findTransactionHash(attestationId) {
       try {
-        // Get past events for AttestationSubmitted
-        const events = await attestationContract.getPastEvents('AttestationSubmitted', {
-          filter: { attestationId: attestationId },
+        console.log('🔍 Searching transaction for attestationId:', attestationId);
+        
+        // Try method 1: Get events without filter (more reliable)
+        const allEvents = await attestationContract.getPastEvents('AttestationSubmitted', {
           fromBlock: 0,
           toBlock: 'latest'
         });
 
-        if (events && events.length > 0) {
-          return events[0].transactionHash;
+        console.log(`📦 Found ${allEvents.length} total AttestationSubmitted events`);
+
+        // Manually filter for our attestationId
+        const matchingEvent = allEvents.find(event => {
+          const eventAttestationId = event.returnValues.attestationId;
+          return eventAttestationId.toLowerCase() === attestationId.toLowerCase();
+        });
+
+        if (matchingEvent) {
+          console.log('✅ Found transaction hash:', matchingEvent.transactionHash);
+          return matchingEvent.transactionHash;
         }
         
+        console.warn('⚠️ No matching event found for attestationId:', attestationId);
         return null;
       } catch (error) {
-        console.warn('Could not find transaction hash:', error);
+        console.error('❌ Error finding transaction hash:', error);
         return null;
       }
     }
@@ -808,9 +819,12 @@
               View Transaction on Polygonscan
             </a>
           ` : `
-            <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}" target="_blank" class="btn">
-              View Contract on Polygonscan
+            <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}#events" target="_blank" class="btn">
+              View Contract Events on Polygonscan
             </a>
+            <p style="color: #A1A1AA; font-size: 0.875rem; margin-top: 1rem;">
+              Transaction hash not found automatically. Check contract events.
+            </p>
           `}
         </div>
       `;
