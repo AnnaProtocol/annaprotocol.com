@@ -430,19 +430,16 @@
       RPC: 'https://rpc-amoy.polygon.technology/',
       EXPLORER: 'https://amoy.polygonscan.com',
       CONTRACTS: {
-        AnnaAttestation: '0x8BeD6F60560AEAbCb201A3f84E16830d3fDDA084',
-        AnnaIdentity: '0xe0Ea79B712fB83ee8A8BD8dCb3c6F1cE39aB0A93',
-        AnnaReputation: '0xa71C80fB861AA96bE92098e0c50f5BFEd3Bd5D6F'
+        AnnaAttestation: '0xCd49b6414077AAE8Df7DAeBC41CBfAbF8F93727F',
+        AnnaIdentity: '0xe0Ea79B712fB83ee8A8BD8dCb3c6F1cE39aB0A93'
       }
     };
 
-    const ATTESTATION_ABI = [{"inputs":[{"internalType":"address","name":"_identityContract","type":"address"},{"internalType":"address","name":"_reputationContract","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"bytes32","name":"agentId","type":"bytes32"},{"indexed":false,"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"agentAttestations","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"attestations","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"bytes32","name":"agentId","type":"bytes32"},{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"string","name":"category","type":"string"},{"internalType":"string","name":"metadata","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"string","name":"category","type":"string"},{"internalType":"string","name":"metadata","type":"string"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"submitAttestation","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}];
+    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
-    const IDENTITY_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"agentId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agentAddress","type":"address"},{"indexed":false,"internalType":"string","name":"did","type":"string"}],"name":"AgentRegistered","type":"event"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentIdByAddress","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"agents","outputs":[{"internalType":"bytes32","name":"agentId","type":"bytes32"},{"internalType":"address","name":"agentAddress","type":"address"},{"internalType":"string","name":"did","type":"string"},{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"},{"internalType":"bool","name":"isActive","type":"bool"}],"stateMutability":"view","type":"function"}];
+    const IDENTITY_ABI = [{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentMetadata","outputs":[{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"string","name":"specialization","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
-    const REPUTATION_ABI = [{"inputs":[{"internalType":"address","name":"_attestationContract","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"agentId","type":"bytes32"},{"indexed":false,"internalType":"uint256","name":"newScore","type":"uint256"}],"name":"ReputationUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"attestationId","type":"uint256"},{"indexed":true,"internalType":"address","name":"verifier","type":"address"},{"indexed":false,"internalType":"bool","name":"passed","type":"bool"}],"name":"VerificationCompleted","type":"event"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"reputationScore","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"attestationId","type":"uint256"},{"internalType":"bool","name":"passed","type":"bool"},{"internalType":"uint8","name":"score","type":"uint8"}],"name":"verifyAttestation","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"verifications","outputs":[{"internalType":"uint256","name":"attestationId","type":"uint256"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"bool","name":"passed","type":"bool"},{"internalType":"uint8","name":"score","type":"uint8"},{"internalType":"uint256","name":"timestamp","type":"uint256"}],"stateMutability":"view","type":"function"}];
-
-    let web3, attestationContract, identityContract, reputationContract;
+    let web3, attestationContract, identityContract;
 
     // Buscar attestation
     function buscarAttestation() {
@@ -480,7 +477,6 @@
         web3 = new Web3(CONFIG.RPC);
         attestationContract = new web3.eth.Contract(ATTESTATION_ABI, CONFIG.CONTRACTS.AnnaAttestation);
         identityContract = new web3.eth.Contract(IDENTITY_ABI, CONFIG.CONTRACTS.AnnaIdentity);
-        reputationContract = new web3.eth.Contract(REPUTATION_ABI, CONFIG.CONTRACTS.AnnaReputation);
         return true;
       } catch (error) {
         console.error("Erro ao inicializar Web3:", error);
@@ -502,60 +498,41 @@
     }
 
     // Carregar attestation
-    async function loadAttestation(contentHash) {
+    async function loadAttestation(attestationId) {
       try {
-        // Buscar attestation por content hash
-        let attestationId = null;
-        let attestation = null;
+        // Garantir que tem 0x no início
+        if (!attestationId.startsWith('0x')) {
+          attestationId = '0x' + attestationId;
+        }
+
+        // Buscar attestation diretamente pelo ID
+        const attestation = await attestationContract.methods.getAttestation(attestationId).call();
         
-        // Tentar buscar pelo ID diretamente se for um número
-        if (!contentHash.startsWith('0x')) {
-          attestationId = parseInt(contentHash);
-        } else {
-          // Buscar todas as attestations (método simples)
-          // Em produção, você deveria ter um evento ou mapping por hash
-          for (let i = 1; i <= 1000; i++) {
-            try {
-              const att = await attestationContract.methods.attestations(i).call();
-              if (att.contentHash.toLowerCase() === contentHash.toLowerCase()) {
-                attestationId = i;
-                attestation = att;
-                break;
-              }
-            } catch (e) {
-              break; // Chegou no final
-            }
-          }
-        }
-
-        if (!attestation && attestationId) {
-          attestation = await attestationContract.methods.attestations(attestationId).call();
-        }
-
-        if (!attestation || attestation.id === '0') {
+        // Verificar se existe
+        if (attestation.agent === '0x0000000000000000000000000000000000000000') {
           throw new Error('Attestation não encontrada');
         }
 
         // Buscar agente
         let agent = null;
         try {
-          agent = await identityContract.methods.agents(attestation.agentId).call();
+          agent = await identityContract.methods.agentMetadata(attestation.agent).call();
         } catch (e) {
           console.warn('Erro ao buscar agente:', e);
         }
 
-        // Buscar verificação
-        let verification = null;
-        try {
-          verification = await reputationContract.methods.verifications(attestation.id).call();
-        } catch (e) {
-          console.warn('Erro ao buscar verificação:', e);
-        }
-
         return {
-          attestation,
+          attestation: {
+            id: attestationId,
+            ...attestation
+          },
           agent,
-          verification
+          verification: {
+            passed: attestation.status === '1', // Status.Verified
+            score: attestation.consistencyScore,
+            verifier: attestation.verifier,
+            timestamp: attestation.verificationTime
+          }
         };
       } catch (error) {
         console.error("Erro ao buscar attestation:", error);
@@ -568,7 +545,7 @@
       const { attestation, agent, verification } = data;
       
       let statusBadge = '';
-      if (verification && verification.attestationId !== '0') {
+      if (verification && verification.verifier !== '0x0000000000000000000000000000000000000000') {
         if (verification.passed) {
           statusBadge = `
             <span class="status-badge status-verified">
@@ -608,7 +585,7 @@
 
           <div class="info-item">
             <div class="info-label">ID</div>
-            <div class="info-value">#${attestation.id}</div>
+            <div class="info-value hash-value">${attestation.id.slice(0, 10)}...${attestation.id.slice(-8)}</div>
           </div>
 
           <div class="info-item">
@@ -622,7 +599,7 @@
           </div>
         </div>
 
-        ${agent && agent.agentId !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? `
+        ${agent && agent.modelType ? `
           <div class="section-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M12.5 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -632,27 +609,27 @@
 
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">DID</div>
-              <div class="info-value hash-value">${agent.did || 'N/A'}</div>
-            </div>
-
-            <div class="info-item">
               <div class="info-label">Modelo</div>
               <div class="info-value">${agent.modelType || 'N/A'}</div>
             </div>
 
             <div class="info-item">
+              <div class="info-label">Versão</div>
+              <div class="info-value">${agent.modelVersion || 'N/A'}</div>
+            </div>
+
+            <div class="info-item">
               <div class="info-label">Endereço</div>
               <div class="info-value">
-                <a href="${CONFIG.EXPLORER}/address/${agent.agentAddress}" target="_blank" style="color: #B19CFF; text-decoration: none;">
-                  ${formatAddress(agent.agentAddress)}
+                <a href="${CONFIG.EXPLORER}/address/${attestation.agent}" target="_blank" style="color: #B19CFF; text-decoration: none;">
+                  ${formatAddress(attestation.agent)}
                 </a>
               </div>
             </div>
           </div>
         ` : ''}
 
-        ${verification && verification.attestationId !== '0' ? `
+        ${verification && verification.verifier !== '0x0000000000000000000000000000000000000000' ? `
           <div class="section-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
