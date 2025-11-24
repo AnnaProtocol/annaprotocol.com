@@ -463,7 +463,7 @@
       }
     };
 
-    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agent","type":"address"},{"indexed":false,"internalType":"string","name":"category","type":"string"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"}];
 
     const IDENTITY_ABI = [{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentMetadata","outputs":[{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"string","name":"specialization","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
@@ -471,9 +471,8 @@
     let currentTxHash = null; // Store transaction hash
 
     // Copy to clipboard
-    function copyToClipboard(text) {
+    function copyToClipboard(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
-        const btn = event.currentTarget;
         const originalHTML = btn.innerHTML;
         
         btn.classList.add('copied');
@@ -547,11 +546,11 @@
       return date.toLocaleString('en-US');
     }
 
-    // Find transaction hash by searching for AttestationCreated event
+    // Find transaction hash by searching for AttestationSubmitted event
     async function findTransactionHash(attestationId) {
       try {
-        // Get past events for AttestationCreated
-        const events = await attestationContract.getPastEvents('AttestationCreated', {
+        // Get past events for AttestationSubmitted
+        const events = await attestationContract.getPastEvents('AttestationSubmitted', {
           filter: { attestationId: attestationId },
           fromBlock: 0,
           toBlock: 'latest'
@@ -657,7 +656,7 @@
             <div class="info-label">ID</div>
             <div class="info-value hash-value" style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
               <span style="flex: 1;">${attestation.id.slice(0, 10)}...${attestation.id.slice(-8)}</span>
-              <button onclick="copyToClipboard('${attestation.id}')" class="copy-btn" title="Copy full ID">
+              <button onclick="copyToClipboard('${attestation.id}', this)" class="copy-btn" title="Copy full ID">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
