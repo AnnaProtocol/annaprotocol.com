@@ -463,7 +463,7 @@
       }
     };
 
-    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agent","type":"address"},{"indexed":false,"internalType":"string","name":"category","type":"string"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"}];
+    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agent","type":"address"},{"indexed":false,"internalType":"string","name":"category","type":"string"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"verifier","type":"address"},{"indexed":false,"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"indexed":false,"internalType":"uint8","name":"consistencyScore","type":"uint8"}],"name":"AttestationVerified","type":"event"}];
 
     const IDENTITY_ABI = [{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentMetadata","outputs":[{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"string","name":"specialization","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
@@ -546,13 +546,13 @@
       return date.toLocaleString('en-US');
     }
 
-    // Find transaction hash by searching for AttestationSubmitted event
+    // Find transaction hash - prioritizes VERIFICATION tx over creation tx
     async function findTransactionHash(attestationId) {
       try {
         // Normalize attestation ID (ensure it has 0x prefix)
         const normalizedId = attestationId.startsWith('0x') ? attestationId : '0x' + attestationId;
         
-        console.log('🔍 Searching transaction for attestationId:', normalizedId);
+        console.log('🔍 Searching transactions for attestationId:', normalizedId);
         
         // Get current block
         const latestBlock = await web3.eth.getBlockNumber();
@@ -561,29 +561,50 @@
         
         console.log(`📦 Searching blocks ${fromBlock} to ${latestBlock} (last ${blocksToSearch} blocks)`);
         
-        // Get events from recent blocks only (prevents timeout)
-        const allEvents = await attestationContract.getPastEvents('AttestationSubmitted', {
+        // PRIORITY 1: Try to find VERIFICATION transaction (AttestationVerified)
+        console.log('🔍 Searching for VERIFICATION transaction (AttestationVerified)...');
+        try {
+          const verifiedEvents = await attestationContract.getPastEvents('AttestationVerified', {
+            filter: { attestationId: normalizedId },
+            fromBlock: fromBlock,
+            toBlock: 'latest'
+          });
+
+          if (verifiedEvents && verifiedEvents.length > 0) {
+            const txHash = verifiedEvents[0].transactionHash;
+            console.log('✅ Found VERIFICATION transaction:', txHash);
+            return txHash;
+          }
+          console.log('⚠️ No verification transaction found (may not be verified yet)');
+        } catch (e) {
+          console.warn('Error searching AttestationVerified:', e.message);
+        }
+        
+        // FALLBACK: Search for CREATION transaction (AttestationSubmitted)
+        console.log('🔍 Searching for CREATION transaction (AttestationSubmitted)...');
+        const submittedEvents = await attestationContract.getPastEvents('AttestationSubmitted', {
           fromBlock: fromBlock,
           toBlock: 'latest'
         });
 
-        console.log(`📋 Found ${allEvents.length} AttestationSubmitted events in range`);
+        console.log(`📋 Found ${submittedEvents.length} AttestationSubmitted events in range`);
 
-        if (allEvents.length === 0) {
+        if (submittedEvents.length === 0) {
           console.warn('⚠️ No events found in recent blocks. Attestation may be older.');
           return null;
         }
 
         // Manually filter for our attestationId (normalize both for comparison)
-        const matchingEvent = allEvents.find(event => {
+        const matchingEvent = submittedEvents.find(event => {
           const eventId = event.returnValues.attestationId;
           const normalizedEventId = eventId.startsWith('0x') ? eventId : '0x' + eventId;
           return normalizedEventId.toLowerCase() === normalizedId.toLowerCase();
         });
 
         if (matchingEvent) {
-          console.log('✅ Found transaction hash:', matchingEvent.transactionHash);
-          return matchingEvent.transactionHash;
+          const txHash = matchingEvent.transactionHash;
+          console.log('✅ Found CREATION transaction:', txHash);
+          return txHash;
         }
         
         console.warn('⚠️ No matching event found. Possible reasons:');
@@ -834,8 +855,11 @@
         <div style="margin-top: 2rem; text-align: center;">
           ${currentTxHash ? `
             <a href="${CONFIG.EXPLORER}/tx/${currentTxHash}" target="_blank" class="btn">
-              View Transaction on Polygonscan
+              View Verification on Polygonscan
             </a>
+            <p style="color: #A1A1AA; font-size: 0.875rem; margin-top: 0.5rem;">
+              Transaction hash found automatically
+            </p>
           ` : `
             <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
               <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}#events" target="_blank" class="btn">
