@@ -103,34 +103,72 @@
     }
 
     .info-item {
-      background: rgba(177, 156, 255, 0.05);
+      background: rgba(177, 156, 255, 0.03);
       border: 1px solid rgba(177, 156, 255, 0.1);
       border-radius: 12px;
       padding: 1.25rem;
     }
 
     .info-label {
-      color: #A1A1AA;
-      font-size: 0.875rem;
+      color: var(--muted);
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-bottom: 0.5rem;
     }
 
     .info-value {
-      color: #E5E5F0;
+      color: #E5E5E5;
       font-size: 1rem;
-      word-break: break-word;
-      font-weight: 500;
+      word-break: break-all;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .hash-value {
+    .hash-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(177, 156, 255, 0.05);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(177, 156, 255, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .hash-text {
+      flex: 1;
+      color: #B19CFF;
       font-family: 'Courier New', monospace;
-      font-size: 0.875rem;
-      background: rgba(106, 90, 255, 0.1);
-      padding: 0.5rem;
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: rgba(177, 156, 255, 0.1);
+      border: 1px solid rgba(177, 156, 255, 0.2);
+      color: var(--violet);
+      padding: 0.5rem 1rem;
       border-radius: 8px;
-      overflow-x: auto;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: rgba(177, 156, 255, 0.15);
+      border-color: rgba(177, 156, 255, 0.3);
+    }
+
+    .copy-btn.copied {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #22c55e;
     }
 
     .status-badge {
@@ -138,45 +176,121 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.5rem 1rem;
-      border-radius: 999px;
-      font-size: 0.875rem;
+      border-radius: 24px;
+      font-size: 0.9rem;
       font-weight: 600;
     }
 
     .status-verified {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
     }
 
     .status-pending {
-      background: rgba(251, 191, 36, 0.15);
+      background: rgba(251, 191, 36, 0.1);
       color: #fbbf24;
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      border: 1px solid rgba(251, 191, 36, 0.2);
     }
 
-    .status-failed {
-      background: rgba(239, 68, 68, 0.15);
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.1);
       color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      color: white;
+      border: none;
+      padding: 0.875rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(177, 156, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(177, 156, 255, 0.1);
+      color: var(--violet);
+      border: 1px solid rgba(177, 156, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(177, 156, 255, 0.15);
+    }
+
+    .search-box {
+      margin-bottom: 2rem;
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-input {
+      flex: 1;
+      background: rgba(177, 156, 255, 0.05);
+      border: 1px solid rgba(177, 156, 255, 0.2);
+      color: #E5E5E5;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px rgba(177, 156, 255, 0.1);
+    }
+
+    .search-examples {
+      background: rgba(177, 156, 255, 0.03);
+      border: 1px solid rgba(177, 156, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .search-examples-title {
+      color: var(--violet);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .search-examples-text {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
     }
 
     .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
+      text-align: center;
       padding: 3rem;
-      color: #B19CFF;
+      color: var(--muted);
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border: 4px solid rgba(177, 156, 255, 0.1);
-      border-top-color: #B19CFF;
+      border-top-color: var(--violet);
       border-radius: 50%;
       animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
     }
 
     @keyframes spin {
@@ -184,218 +298,106 @@
     }
 
     .error {
-      color: #ef4444;
       text-align: center;
       padding: 2rem;
+      color: #ef4444;
     }
 
-    .btn {
-      background: linear-gradient(135deg, #6A5AFF, #B19CFF);
-      color: white;
-      padding: 0.875rem 2rem;
-      border-radius: 12px;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-block;
-      transition: all 0.3s ease;
-      border: none;
-      cursor: pointer;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1rem;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(106, 90, 255, 0.3);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .copy-btn {
-      background: rgba(177, 156, 255, 0.1);
-      border: 1px solid rgba(177, 156, 255, 0.3);
-      border-radius: 6px;
-      padding: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #B19CFF;
-    }
-
-    .copy-btn:hover {
-      background: rgba(177, 156, 255, 0.2);
-      transform: scale(1.1);
-    }
-
-    .copy-btn:active {
-      transform: scale(0.95);
-    }
-
-    .copy-btn.copied {
-      background: rgba(34, 197, 94, 0.2);
-      border-color: rgba(34, 197, 94, 0.5);
-      color: #4ade80;
-    }
-
-    .back-link {
-      position: fixed;
-      top: 2rem;
-      left: 2rem;
-      color: #B19CFF;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      z-index: 20;
-    }
-
-    .back-link:hover {
-      color: #CFCBFF;
-      transform: translateX(-4px);
-    }
-
-    .blockchain-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: rgba(130, 71, 229, 0.15);
-      border: 1px solid rgba(130, 71, 229, 0.3);
-      border-radius: 999px;
-      color: #a78bfa;
-      font-size: 0.875rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-
-    /* SEARCH FIELD */
-    .search-container {
-      text-align: center;
-      padding: 3rem 2rem;
-    }
-
-    .search-title {
-      color: #B19CFF;
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    .search-subtitle {
-      color: #A1A1AA;
-      font-size: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .search-input-group {
-      display: flex;
-      gap: 1rem;
-      max-width: 700px;
-      margin: 0 auto;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .search-input {
-      flex: 1;
-      min-width: 300px;
-      padding: 1rem 1.5rem;
-      background: rgba(177, 156, 255, 0.05);
-      border: 2px solid rgba(177, 156, 255, 0.2);
-      border-radius: 12px;
-      color: #E5E5F0;
-      font-family: 'Courier New', monospace;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #B19CFF;
-      background: rgba(177, 156, 255, 0.08);
-    }
-
-    .search-input::placeholder {
-      color: #666;
-    }
-
-    .search-examples {
-      margin-top: 2rem;
-      padding: 1.5rem;
+    .metadata-section {
       background: rgba(177, 156, 255, 0.03);
       border: 1px solid rgba(177, 156, 255, 0.1);
       border-radius: 12px;
-      text-align: left;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
     }
 
-    .search-examples-title {
-      color: #B19CFF;
-      font-size: 0.875rem;
+    .metadata-grid {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .metadata-item {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: rgba(177, 156, 255, 0.02);
+      border-radius: 8px;
+    }
+
+    .metadata-key {
+      color: var(--muted);
+      font-size: 0.85rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 1rem;
     }
 
-    .search-examples-text {
-      color: #A1A1AA;
-      font-size: 0.875rem;
-      line-height: 1.6;
+    .metadata-value {
+      color: #E5E5E5;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+
+    .tx-warning {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
     }
 
     @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
       .card {
         padding: 1.5rem;
       }
-      
+
       .info-grid {
         grid-template-columns: 1fr;
       }
 
-      .search-input-group {
-        flex-direction: column;
+      .metadata-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
       }
 
-      .search-input {
-        width: 100%;
+      .search-input-wrapper {
+        flex-direction: column;
       }
     }
   </style>
 </head>
+
 <body>
   <canvas id="bgCanvas"></canvas>
-  
-  <a href="/" class="back-link">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M19 12H5M12 19l-7-7 7-7"/>
-    </svg>
-    Back
-  </a>
 
   <div class="container">
     <div class="header">
-      <div class="logo">ANNΛ</div>
-      <div class="subtitle">Attestation Verification</div>
+      <div class="logo">ANNΛ PROTOCOL</div>
+      <div class="subtitle">Attestation Verification v1.2.6</div>
     </div>
 
-    <!-- SEARCH FIELD -->
-    <div id="search" style="display: none;">
+    <!-- SEARCH -->
+    <div id="search">
       <div class="card">
-        <div class="search-container">
-          <div class="search-title">🔍 Search Attestation</div>
-          <div class="search-subtitle">Enter the attestation hash to verify its authenticity.</div>
-          
-          <div class="search-input-group">
+        <div class="search-box">
+          <div class="section-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            Verify Attestation
+          </div>
+
+          <div class="search-input-wrapper">
             <input 
               type="text" 
               id="hashInput" 
@@ -411,8 +413,8 @@
           <div class="search-examples">
             <div class="search-examples-title">💡 How to use</div>
             <div class="search-examples-text">
-              • Paste the attestation hash found in the certificate<br>
-              • The hash must start with "0x" followed by hexadecimal characters<br>
+              • Paste the attestation ID (hash) from your certificate<br>
+              • The hash must start with "0x" followed by 64 hexadecimal characters<br>
               • You can also access directly using: <code style="color: #B19CFF;">?hash=0x...</code>
             </div>
           </div>
@@ -453,22 +455,67 @@
   </div>
 
   <script>
-    // Configuration
+    // ============================================================
+    // CONFIGURATION - UPDATED TO v1.2.6 CONTRACT
+    // ============================================================
     const CONFIG = {
       RPC: 'https://rpc-amoy.polygon.technology/',
       EXPLORER: 'https://amoy.polygonscan.com',
       CONTRACTS: {
-        AnnaAttestation: '0xCd49b6414077AAE8Df7DAeBC41CBfAbF8F93727F',
-        AnnaIdentity: '0xe0Ea79B712fB83ee8A8BD8dCb3c6F1cE39aB0A93'
+        // ✅ NOVO CONTRATO v1.2.6 com campo txHash
+        AnnaAttestation: '0x1a8Cf700B6bCBE4242f0Ad05235Ee18A8b752d68',
+        AnnaIdentity: '0xF1d647F3d5E7B7e2A4C031Cc7F2DD556d73B9496'
       }
     };
 
-    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agent","type":"address"},{"indexed":false,"internalType":"string","name":"category","type":"string"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"verifier","type":"address"},{"indexed":false,"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"indexed":false,"internalType":"uint8","name":"consistencyScore","type":"uint8"}],"name":"AttestationVerified","type":"event"}];
+    // ✅ ABI ATUALIZADA - Incluindo campo txHash (11º campo)
+    const ATTESTATION_ABI = [
+      {
+        "inputs": [{"internalType": "bytes32", "name": "attestationId", "type": "bytes32"}],
+        "name": "getAttestation",
+        "outputs": [{
+          "components": [
+            {"internalType": "bytes32", "name": "contentHash", "type": "bytes32"},
+            {"internalType": "bytes32", "name": "reasoningHash", "type": "bytes32"},
+            {"internalType": "address", "name": "agent", "type": "address"},
+            {"internalType": "string", "name": "modelVersion", "type": "string"},
+            {"internalType": "uint256", "name": "timestamp", "type": "uint256"},
+            {"internalType": "enum AnnaAttestation.Status", "name": "status", "type": "uint8"},
+            {"internalType": "uint8", "name": "consistencyScore", "type": "uint8"},
+            {"internalType": "address", "name": "verifier", "type": "address"},
+            {"internalType": "uint256", "name": "verificationTime", "type": "uint256"},
+            {"internalType": "string", "name": "category", "type": "string"},
+            {"internalType": "bytes32", "name": "txHash", "type": "bytes32"} // ✅ NOVO!
+          ],
+          "internalType": "struct AnnaAttestation.Attestation",
+          "name": "",
+          "type": "tuple"
+        }],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
 
-    const IDENTITY_ABI = [{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentMetadata","outputs":[{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"string","name":"specialization","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"}],"stateMutability":"view","type":"function"}];
+    const IDENTITY_ABI = [
+      {
+        "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "name": "agentMetadata",
+        "outputs": [
+          {"internalType": "string", "name": "modelType", "type": "string"},
+          {"internalType": "string", "name": "modelVersion", "type": "string"},
+          {"internalType": "string", "name": "specialization", "type": "string"},
+          {"internalType": "uint256", "name": "registrationTime", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
 
     let web3, attestationContract, identityContract;
-    let currentTxHash = null; // Store transaction hash
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
 
     // Copy to clipboard
     function copyToClipboard(text, btn) {
@@ -496,12 +543,12 @@
       const hash = document.getElementById('hashInput').value.trim();
       
       if (!hash) {
-        alert('Please enter a hash');
+        alert('Please enter an attestation ID');
         return;
       }
       
-      if (!hash.startsWith('0x') || hash.length < 10) {
-        alert('Invalid hash. It must start with 0x');
+      if (!hash.startsWith('0x') || hash.length !== 66) {
+        alert('Invalid hash format. Must be 0x followed by 64 hex characters');
         return;
       }
 
@@ -520,7 +567,88 @@
       return match ? match[1] : null;
     }
 
-    // Initialize Web3
+    // Format address
+    function formatAddress(addr) {
+      if (!addr) return 'N/A';
+      return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    }
+
+    // Format date
+    function formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      const date = new Date(parseInt(timestamp) * 1000);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    // Format category - parse JSON if needed and display nicely
+    function formatCategory(category) {
+      if (!category) return 'N/A';
+      
+      try {
+        // Try to parse as JSON
+        const parsed = JSON.parse(category);
+        
+        // Extract readable fields
+        const parts = [];
+        
+        if (parsed.external_id) parts.push(`ID: ${parsed.external_id}`);
+        if (parsed.document_type) parts.push(`Type: ${parsed.document_type.replace(/_/g, ' ')}`);
+        if (parsed.client_name) parts.push(`Client: ${parsed.client_name}`);
+        if (parsed.system_origin) parts.push(`System: ${parsed.system_origin}`);
+        
+        // If has custom fields, show count
+        if (parsed.custom_fields && Object.keys(parsed.custom_fields).length > 0) {
+          parts.push(`+${Object.keys(parsed.custom_fields).length} custom fields`);
+        }
+        
+        return parts.length > 0 ? parts.join(' • ') : 'Structured metadata';
+        
+      } catch (e) {
+        // Not JSON, return as-is
+        return category;
+      }
+    }
+
+    // Check if string is valid JSON
+    function isValidJSON(str) {
+      try {
+        JSON.parse(str);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Toggle metadata visibility
+    function toggleMetadata() {
+      const elem = document.getElementById('fullMetadata');
+      if (elem) {
+        elem.style.display = elem.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    // Format status
+    function getStatusInfo(status) {
+      const statusMap = {
+        0: { text: 'Pending', class: 'status-pending' },
+        1: { text: 'Verified', class: 'status-verified' },
+        2: { text: 'Rejected', class: 'status-rejected' },
+        3: { text: 'Challenged', class: 'status-pending' }
+      };
+      return statusMap[status] || { text: 'Unknown', class: 'status-pending' };
+    }
+
+    // ============================================================
+    // WEB3 INITIALIZATION
+    // ============================================================
+
     async function initWeb3() {
       try {
         web3 = new Web3(CONFIG.RPC);
@@ -533,181 +661,162 @@
       }
     }
 
-    // Format address
-    function formatAddress(addr) {
-      if (!addr) return 'N/A';
-      return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-    }
+    // ============================================================
+    // MAIN LOAD FUNCTION
+    // ============================================================
 
-    // Format date
-    function formatDate(timestamp) {
-      if (!timestamp) return 'N/A';
-      const date = new Date(parseInt(timestamp) * 1000);
-      return date.toLocaleString('en-US');
-    }
-
-    // Find transaction hash - prioritizes VERIFICATION tx over creation tx
-    async function findTransactionHash(attestationId) {
-      try {
-        // Normalize attestation ID (ensure it has 0x prefix)
-        const normalizedId = attestationId.startsWith('0x') ? attestationId : '0x' + attestationId;
-        
-        console.log('🔍 Searching transactions for attestationId:', normalizedId);
-        
-        // Get current block
-        const latestBlock = await web3.eth.getBlockNumber();
-        const blocksToSearch = 50000; // Last ~50k blocks (~1-2 days on Polygon)
-        const fromBlock = Math.max(0, latestBlock - blocksToSearch);
-        
-        console.log(`📦 Searching blocks ${fromBlock} to ${latestBlock} (last ${blocksToSearch} blocks)`);
-        
-        // PRIORITY 1: Try to find VERIFICATION transaction (AttestationVerified)
-        console.log('🔍 Searching for VERIFICATION transaction (AttestationVerified)...');
-        try {
-          const verifiedEvents = await attestationContract.getPastEvents('AttestationVerified', {
-            filter: { attestationId: normalizedId },
-            fromBlock: fromBlock,
-            toBlock: 'latest'
-          });
-
-          if (verifiedEvents && verifiedEvents.length > 0) {
-            const txHash = verifiedEvents[0].transactionHash;
-            console.log('✅ Found VERIFICATION transaction:', txHash);
-            return txHash;
-          }
-          console.log('⚠️ No verification transaction found (may not be verified yet)');
-        } catch (e) {
-          console.warn('Error searching AttestationVerified:', e.message);
-        }
-        
-        // FALLBACK: Search for CREATION transaction (AttestationSubmitted)
-        console.log('🔍 Searching for CREATION transaction (AttestationSubmitted)...');
-        const submittedEvents = await attestationContract.getPastEvents('AttestationSubmitted', {
-          fromBlock: fromBlock,
-          toBlock: 'latest'
-        });
-
-        console.log(`📋 Found ${submittedEvents.length} AttestationSubmitted events in range`);
-
-        if (submittedEvents.length === 0) {
-          console.warn('⚠️ No events found in recent blocks. Attestation may be older.');
-          return null;
-        }
-
-        // Manually filter for our attestationId (normalize both for comparison)
-        const matchingEvent = submittedEvents.find(event => {
-          const eventId = event.returnValues.attestationId;
-          const normalizedEventId = eventId.startsWith('0x') ? eventId : '0x' + eventId;
-          return normalizedEventId.toLowerCase() === normalizedId.toLowerCase();
-        });
-
-        if (matchingEvent) {
-          const txHash = matchingEvent.transactionHash;
-          console.log('✅ Found CREATION transaction:', txHash);
-          return txHash;
-        }
-        
-        console.warn('⚠️ No matching event found. Possible reasons:');
-        console.warn('   - Attestation is older than 50k blocks');
-        console.warn('   - Attestation ID is incorrect');
-        return null;
-      } catch (error) {
-        console.error('❌ Error finding transaction hash:', error);
-        return null;
-      }
-    }
-
-    // Load attestation
     async function loadAttestation(attestationId) {
       try {
-        if (!attestationId.startsWith('0x')) {
-          attestationId = '0x' + attestationId;
-        }
-
+        console.log('🔍 Loading attestation:', attestationId);
+        
+        // Get attestation data from contract
         const attestation = await attestationContract.methods.getAttestation(attestationId).call();
         
-        if (attestation.agent === '0x0000000000000000000000000000000000000000') {
-          throw new Error('Attestation not found');
-        }
+        console.log('✅ Attestation data:', attestation);
 
-        // Try to find transaction hash
-        currentTxHash = await findTransactionHash(attestationId);
+        // ✅ CAMPO 10 (índice 10) É O TXHASH!
+        const txHash = attestation[10]; // txHash é o 11º campo (índice 10)
+        
+        console.log('📝 TxHash from contract:', txHash);
 
-        let agent = null;
+        // Check if txHash exists and is not empty
+        const hasTxHash = txHash && txHash !== '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+        // Get agent metadata
+        let agentMetadata = null;
         try {
-          agent = await identityContract.methods.agentMetadata(attestation.agent).call();
+          agentMetadata = await identityContract.methods.agentMetadata(attestation[2]).call();
         } catch (e) {
-          console.warn('Error fetching agent metadata:', e);
+          console.warn('Could not load agent metadata:', e);
         }
 
-        return {
-          attestation: {
-            id: attestationId,
-            ...attestation
-          },
-          agent,
-          verification: {
-            passed: parseInt(attestation.status) === 1,
-            score: attestation.consistencyScore,
-            verifier: attestation.verifier,
-            timestamp: attestation.verificationTime
-          }
+        // Build result object
+        const result = {
+          id: attestationId,
+          contentHash: attestation[0],
+          reasoningHash: attestation[1],
+          agent: attestation[2],
+          modelVersion: attestation[3],
+          timestamp: attestation[4],
+          status: parseInt(attestation[5]),
+          consistencyScore: parseInt(attestation[6]),
+          verifier: attestation[7],
+          verificationTime: attestation[8],
+          category: attestation[9],
+          txHash: hasTxHash ? txHash : null, // ✅ PEGA DIRETO DO CONTRATO!
+          agentMetadata: agentMetadata
         };
+
+        displayAttestation(result);
+
       } catch (error) {
-        console.error("Error loading attestation:", error);
-        throw error;
+        console.error('Error loading attestation:', error);
+        throw new Error(`Could not load attestation: ${error.message}`);
       }
     }
 
-    // Render content
-    function renderContent(data) {
-      const { attestation, agent, verification } = data;
+    // ============================================================
+    // DISPLAY FUNCTIONS
+    // ============================================================
+
+    function displayAttestation(data) {
+      const statusInfo = getStatusInfo(data.status);
       
-      let statusBadge = '';
-      if (verification && verification.verifier !== '0x0000000000000000000000000000000000000000') {
-        if (verification.passed) {
-          statusBadge = `
-            <span class="status-badge status-verified">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 6L9 17l-5-5"/>
-              </svg>
-              Verified
-            </span>
-          `;
-        } else {
-          statusBadge = `<span class="status-badge status-failed">❌ Failed</span>`;
-        }
+      let txHashSection = '';
+      if (data.txHash) {
+        const explorerLink = `${CONFIG.EXPLORER}/tx/${data.txHash}`;
+        txHashSection = `
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <div class="info-label">📝 Creation Transaction</div>
+            <div style="display: flex; gap: 1rem; margin-top: 0.75rem;">
+              <a href="${explorerLink}" target="_blank" class="btn" style="flex: 1; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                View Transaction on PolygonScan
+              </a>
+            </div>
+            <div class="hash-display" style="margin-top: 1rem;">
+              <div class="hash-text">${data.txHash}</div>
+              <button onclick="copyToClipboard('${data.txHash}', this)" class="copy-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy
+              </button>
+            </div>
+          </div>
+        `;
       } else {
-        statusBadge = `<span class="status-badge status-pending">⏳ Pending</span>`;
+        txHashSection = `
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <div class="tx-warning">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <div>
+                <strong>Transaction hash not available</strong><br>
+                This attestation was created before v1.2.6 contract upgrade. Transaction hash storage was added in newer versions.
+              </div>
+            </div>
+          </div>
+        `;
       }
 
-      const content = `
-        <div class="blockchain-badge">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
-          Polygon Amoy Testnet
-        </div>
-
+      const html = `
         <div class="section-title">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          Attestation Information
+          Attestation Details
+        </div>
+
+        <div class="hash-display">
+          <div class="hash-text">${data.id}</div>
+          <button onclick="copyToClipboard('${data.id}', this)" class="copy-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copy
+          </button>
         </div>
 
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">Status</div>
-            <div class="info-value">${statusBadge}</div>
+            <div class="info-value">
+              <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+            </div>
           </div>
 
           <div class="info-item">
-            <div class="info-label">ID</div>
-            <div class="info-value hash-value" style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
-              <span style="flex: 1;">${attestation.id.slice(0, 10)}...${attestation.id.slice(-8)}</span>
-              <button onclick="copyToClipboard('${attestation.id}', this)" class="copy-btn" title="Copy full ID">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="info-label">Category</div>
+            <div class="info-value">${formatCategory(data.category)}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Consistency Score</div>
+            <div class="info-value">${data.consistencyScore}/100</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Creation Date</div>
+            <div class="info-value">${formatDate(data.timestamp)}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Agent Address</div>
+            <div class="info-value">
+              ${formatAddress(data.agent)}
+              <button onclick="copyToClipboard('${data.agent}', this)" class="copy-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
@@ -716,265 +825,200 @@
           </div>
 
           <div class="info-item">
-            <div class="info-label">Category</div>
-            <div class="info-value">${(() => {
-              try {
-                const cat = JSON.parse(attestation.category);
-                return cat.document_type || attestation.category;
-              } catch {
-                return attestation.category || 'N/A';
-              }
-            })()}</div>
+            <div class="info-label">Model Version</div>
+            <div class="info-value">${data.modelVersion || 'N/A'}</div>
           </div>
 
-          <div class="info-item">
-            <div class="info-label">Date</div>
-            <div class="info-value">${formatDate(attestation.timestamp)}</div>
-          </div>
-        </div>
-
-        ${(() => {
-          try {
-            const metadata = JSON.parse(attestation.category);
-            if (metadata.external_id || metadata.client_name) {
-              return `
-                <div class="section-title">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                  </svg>
-                  Metadata
-                </div>
-
-                <div class="info-grid">
-                  ${metadata.external_id ? `
-                    <div class="info-item">
-                      <div class="info-label">External ID</div>
-                      <div class="info-value">${metadata.external_id}</div>
-                    </div>
-                  ` : ''}
-                  
-                  ${metadata.client_name ? `
-                    <div class="info-item">
-                      <div class="info-label">Client</div>
-                      <div class="info-value">${metadata.client_name}</div>
-                    </div>
-                  ` : ''}
-                  
-                  ${metadata.system_origin ? `
-                    <div class="info-item">
-                      <div class="info-label">System</div>
-                      <div class="info-value">${metadata.system_origin}</div>
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }
-            return '';
-          } catch {
-            return '';
-          }
-        })()}
-
-        ${agent && agent.modelType ? `
-          <div class="section-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M12.5 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            AI Agent
-          </div>
-
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">Model</div>
-              <div class="info-value">${agent.modelType || 'N/A'}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-label">Version</div>
-              <div class="info-value">${agent.modelVersion || 'N/A'}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-label">Address</div>
-              <div class="info-value">
-                <a href="${CONFIG.EXPLORER}/address/${attestation.agent}" target="_blank" style="color: #B19CFF; text-decoration: none;">
-                  ${formatAddress(attestation.agent)}
-                </a>
-              </div>
-            </div>
-          </div>
-        ` : ''}
-
-        ${verification && verification.verifier !== '0x0000000000000000000000000000000000000000' ? `
-          <div class="section-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Verification Result
-          </div>
-
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">Score</div>
-              <div class="info-value">${verification.score}/100</div>
-            </div>
-
+          ${data.verifier && data.verifier !== '0x0000000000000000000000000000000000000000' ? `
             <div class="info-item">
               <div class="info-label">Verifier</div>
-              <div class="info-value">
-                <a href="${CONFIG.EXPLORER}/address/${verification.verifier}" target="_blank" style="color: #B19CFF; text-decoration: none;">
-                  ${formatAddress(verification.verifier)}
-                </a>
-              </div>
+              <div class="info-value">${formatAddress(data.verifier)}</div>
             </div>
 
             <div class="info-item">
               <div class="info-label">Verification Date</div>
-              <div class="info-value">${formatDate(verification.timestamp)}</div>
+              <div class="info-value">${formatDate(data.verificationTime)}</div>
+            </div>
+          ` : ''}
+
+          ${txHashSection}
+        </div>
+
+        ${data.agentMetadata ? `
+          <div class="metadata-section">
+            <div class="section-title" style="font-size: 1.2rem;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Agent Information
+            </div>
+            <div class="metadata-grid">
+              <div class="metadata-item">
+                <div class="metadata-key">Model Type</div>
+                <div class="metadata-value">${data.agentMetadata[0] || 'N/A'}</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-key">Model Version</div>
+                <div class="metadata-value">${data.agentMetadata[1] || 'N/A'}</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-key">Specialization</div>
+                <div class="metadata-value">${data.agentMetadata[2] || 'N/A'}</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-key">Registration Date</div>
+                <div class="metadata-value">${formatDate(data.agentMetadata[3])}</div>
+              </div>
             </div>
           </div>
         ` : ''}
 
-        <div class="section-title">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
-          </svg>
-          Cryptographic Hashes
-        </div>
-
-        <div class="info-item">
-          <div class="info-label">Content Hash</div>
-          <div class="info-value hash-value">${attestation.contentHash}</div>
-        </div>
-
-        <div class="info-item" style="margin-top: 1rem;">
-          <div class="info-label">Reasoning Hash</div>
-          <div class="info-value hash-value">${attestation.reasoningHash}</div>
-        </div>
-
-        <div style="margin-top: 2rem; text-align: center;">
-          ${currentTxHash ? `
-            <a href="${CONFIG.EXPLORER}/tx/${currentTxHash}" target="_blank" class="btn">
-              View Verification on Polygonscan
-            </a>
-            <p style="color: #A1A1AA; font-size: 0.875rem; margin-top: 0.5rem;">
-              Transaction hash found automatically
-            </p>
-          ` : `
-            <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
-              <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}#events" target="_blank" class="btn">
-                View All Contract Events
-              </a>
-              <p style="color: #A1A1AA; font-size: 0.875rem; max-width: 500px;">
-                Transaction not found automatically (may be older than 50k blocks). 
-                Click above to view all events and search for:<br>
-                <code style="background: rgba(106, 90, 255, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all;">
-                  ${attestation.id}
-                </code>
-              </p>
+        ${isValidJSON(data.category) ? `
+          <div class="metadata-section">
+            <div class="section-title" style="font-size: 1.2rem; cursor: pointer;" onclick="toggleMetadata()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
+              Full Metadata
+              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 400; margin-left: auto;">(click to expand)</span>
             </div>
-          `}
+            <div id="fullMetadata" style="display: none; margin-top: 1rem;">
+              <pre style="background: rgba(177, 156, 255, 0.05); border: 1px solid rgba(177, 156, 255, 0.1); border-radius: 8px; padding: 1rem; overflow-x: auto; color: #E5E5E5; font-size: 0.85rem; line-height: 1.6;">${JSON.stringify(JSON.parse(data.category), null, 2)}</pre>
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+          <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}" target="_blank" class="btn btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            View Contract
+          </a>
+          <button onclick="location.href='?'" class="btn btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            New Search
+          </button>
         </div>
       `;
 
-      document.getElementById('content').innerHTML = content;
+      document.getElementById('content').innerHTML = html;
       document.getElementById('content').style.display = 'block';
-      document.getElementById('loading').style.display = 'none';
     }
 
-    // Show error
+    // ============================================================
+    // ERROR HANDLING
+    // ============================================================
+
     function showError(message) {
       document.getElementById('error-message').textContent = message;
-      document.getElementById('error').style.display = 'block';
+      document.getElementById('search').style.display = 'none';
       document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
     }
 
-    // Initialize
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+
     async function init() {
-      const hash = getAttestationHash();
-      
-      if (!hash) {
+      const attestationId = getAttestationHash();
+
+      if (!attestationId) {
         document.getElementById('search').style.display = 'block';
         return;
       }
 
+      document.getElementById('search').style.display = 'none';
       document.getElementById('loading').style.display = 'block';
 
-      const web3Ready = await initWeb3();
-      if (!web3Ready) {
-        showError('Error connecting to the blockchain. Try again later.');
-        return;
-      }
-
       try {
-        const data = await loadAttestation(hash);
-        renderContent(data);
+        const web3Ready = await initWeb3();
+        if (!web3Ready) {
+          throw new Error('Failed to initialize Web3 connection');
+        }
+
+        await loadAttestation(attestationId);
       } catch (error) {
-        showError(`Error loading attestation: ${error.message}`);
+        console.error('Initialization error:', error);
+        showError(error.message);
+      } finally {
+        document.getElementById('loading').style.display = 'none';
       }
     }
 
-    // Background animation
-    (function(){
+    // ============================================================
+    // BACKGROUND ANIMATION (Three.js)
+    // ============================================================
+
+    function initBackground() {
       const canvas = document.getElementById('bgCanvas');
       const scene = new THREE.Scene();
-      const clock = new THREE.Clock();
-      const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x000000, 0);
-      const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 1, 2000);
-      camera.position.z = 420;
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
       
-      function resize(){
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.position.z = 5;
+
+      const geometry = new THREE.IcosahedronGeometry(1, 1);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x6A5AFF,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.1
+      });
+      
+      const icosahedron = new THREE.Mesh(geometry, material);
+      scene.add(icosahedron);
+
+      const particles = new THREE.BufferGeometry();
+      const particleCount = 1000;
+      const positions = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 20;
+      }
+
+      particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const particleMaterial = new THREE.PointsMaterial({
+        color: 0xB19CFF,
+        size: 0.02,
+        transparent: true,
+        opacity: 0.6
+      });
+
+      const particleSystem = new THREE.Points(particles, particleMaterial);
+      scene.add(particleSystem);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        icosahedron.rotation.x += 0.001;
+        icosahedron.rotation.y += 0.002;
+        particleSystem.rotation.y += 0.0005;
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-      }
-      window.addEventListener('resize', resize);
-      resize();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
 
-      const PARTICLE_COUNT = 150, MAX_DIST = 120;
-      const positions = new Float32Array(PARTICLE_COUNT * 3);
-      const basePositions = [], velocities = [];
-      
-      for(let i=0;i<PARTICLE_COUNT;i++){
-        const x = (Math.random()-0.5)*420;
-        const y = (Math.random()-0.5)*240;
-        const z = (Math.random()-0.5)*240;
-        positions[i*3]=x; positions[i*3+1]=y; positions[i*3+2]=z;
-        basePositions.push(new THREE.Vector3(x,y,z));
-        velocities.push(new THREE.Vector3((Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02));
-      }
-
-      const pointsGeom = new THREE.BufferGeometry();
-      pointsGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const pointsMat = new THREE.PointsMaterial({color:0x9F8CFF,size:2.2,opacity:0.9,transparent:true});
-      const points = new THREE.Points(pointsGeom, pointsMat);
-      scene.add(points);
-
-      const tmpV=new THREE.Vector3();
-      function animate(){
-        const t=clock.getElapsedTime();
-        for(let i=0;i<PARTICLE_COUNT;i++){
-          const idx=i*3, base=basePositions[i];
-          tmpV.copy(base);
-          tmpV.x+=Math.sin(t*0.6+i)*6+velocities[i].x*40;
-          tmpV.y+=Math.cos(t*0.5+i*0.7)*5+velocities[i].y*40;
-          tmpV.z+=Math.sin(t*0.4+i*0.9)*6+velocities[i].z*40;
-          positions[idx]=tmpV.x;positions[idx+1]=tmpV.y;positions[idx+2]=tmpV.z;
-        }
-        pointsGeom.attributes.position.needsUpdate=true;
-
-        scene.rotation.y=Math.sin(t*0.05)*0.05;
-        camera.position.z=420+Math.sin(t*0.12)*8;
-        camera.lookAt(0,0,0);
-        renderer.render(scene,camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
-    })();
-
-    window.addEventListener('DOMContentLoaded', init);
+    // Start everything
+    window.addEventListener('DOMContentLoaded', () => {
+      initBackground();
+      init();
+    });
   </script>
 </body>
 </html>
