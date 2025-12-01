@@ -892,6 +892,42 @@
           ${txHashSection}
         </div>
 
+        
+        <div class="metadata-section" style="margin-top: 2rem;">
+          <div class="section-title" style="font-size: 1.2rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            Cryptographic Hashes
+          </div>
+          <div class="info-grid" style="margin-top: 1rem;">
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <div class="info-label">Content Hash</div>
+              <div class="hash-display" style="margin-top: 0.5rem;">
+                <div class="hash-text" style="font-size: 0.85rem;">${data.contentHash}</div>
+                <button onclick="copyToClipboard('${data.contentHash}', this)" class="copy-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <div class="info-label">Reasoning Hash</div>
+              <div class="hash-display" style="margin-top: 0.5rem;">
+                <div class="hash-text" style="font-size: 0.85rem;">${data.reasoningHash}</div>
+                <button onclick="copyToClipboard('${data.reasoningHash}', this)" class="copy-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         ${data.agentMetadata ? `
           <div class="metadata-section">
             <div class="section-title" style="font-size: 1.2rem;">
