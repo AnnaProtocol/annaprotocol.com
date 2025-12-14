@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Attestation Verification - ANNÎ› Protocol</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #03010A;
+      --violet: #B19CFF;
+      --indigo: #6A5AFF;
+      --muted: #A1A1AA;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: clamp(32px, 5vw, 60px);
+      letter-spacing: 0.12em;
+      background: linear-gradient(90deg, #bba8ff, #7b5ffb, #bba8ff);
+      background-size: 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 6s linear infinite;
+      margin-bottom: 0.5rem;
+    }
+
+    @keyframes shine {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .subtitle {
+      color: #CFCBFF;
+      font-size: clamp(12px, 1.2vw, 16px);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0.8;
+    }
+
+    .card {
+      background: rgba(15, 8, 35, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(177, 156, 255, 0.15);
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(177, 156, 255, 0.1);
+    }
+
+    .section-title {
+      color: #B19CFF;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-item {
+      background: rgba(177, 156, 255, 0.05);
+      border: 1px solid rgba(177, 156, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .info-label {
+      color: #A1A1AA;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+      color: #E5E5F0;
+      font-size: 1rem;
+      word-break: break-word;
+      font-weight: 500;
+    }
+
+    .hash-value {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      background: rgba(106, 90, 255, 0.1);
+      padding: 0.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .status-verified {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 3rem;
+      color: #B19CFF;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(177, 156, 255, 0.1);
+      border-top-color: #B19CFF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #ef4444;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6A5AFF, #B19CFF);
+      color: white;
+      padding: 0.875rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(106, 90, 255, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .copy-btn {
+      background: rgba(177, 156, 255, 0.1);
+      border: 1px solid rgba(177, 156, 255, 0.3);
+      border-radius: 6px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #B19CFF;
+    }
+
+    .copy-btn:hover {
+      background: rgba(177, 156, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    .copy-btn.copied {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.5);
+      color: #4ade80;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      color: #B19CFF;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      z-index: 20;
+    }
+
+    .back-link:hover {
+      color: #CFCBFF;
+      transform: translateX(-4px);
+    }
+
+    .blockchain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(130, 71, 229, 0.15);
+      border: 1px solid rgba(130, 71, 229, 0.3);
+      border-radius: 999px;
+      color: #a78bfa;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    /* SEARCH FIELD */
+    .search-container {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .search-title {
+      color: #B19CFF;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .search-subtitle {
+      color: #A1A1AA;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-input-group {
+      display: flex;
+      gap: 1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 300px;
+      padding: 1rem 1.5rem;
+      background: rgba(177, 156, 255, 0.05);
+      border: 2px solid rgba(177, 156, 255, 0.2);
+      border-radius: 12px;
+      color: #E5E5F0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #B19CFF;
+      background: rgba(177, 156, 255, 0.08);
+    }
+
+    .search-input::placeholder {
+      color: #666;
+    }
+
+    .search-examples {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(177, 156, 255, 0.03);
+      border: 1px solid rgba(177, 156, 255, 0.1);
+      border-radius: 12px;
+      text-align: left;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .search-examples-title {
+      color: #B19CFF;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .search-examples-text {
+      color: #A1A1AA;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 1.5rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .search-input-group {
+        flex-direction: column;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+  
+  <a href="/" class="back-link">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Back
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">ANNÎ›</div>
+      <div class="subtitle">Attestation Verification</div>
+    </div>
+
+    <!-- SEARCH FIELD -->
+    <div id="search" style="display: none;">
+      <div class="card">
+        <div class="search-container">
+          <div class="search-title">ðŸ” Search Attestation</div>
+          <div class="search-subtitle">Enter the attestation hash to verify its authenticity.</div>
+          
+          <div class="search-input-group">
+            <input 
+              type="text" 
+              id="hashInput" 
+              class="search-input"
+              placeholder="0x123456789abcdef..."
+              onkeypress="if(event.key==='Enter') buscarAttestation()"
+            />
+            <button onclick="buscarAttestation()" class="btn">
+              Check
+            </button>
+          </div>
+
+          <div class="search-examples">
+            <div class="search-examples-title">ðŸ’¡ How to use</div>
+            <div class="search-examples-text">
+              â€¢ Paste the attestation hash found in the certificate<br>
+              â€¢ The hash must start with "0x" followed by hexadecimal characters<br>
+              â€¢ You can also access directly using: <code style="color: #B19CFF;">?hash=0x...</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div id="loading" style="display: none;">
+      <div class="card">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>Loading blockchain data...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div id="error" style="display: none;">
+      <div class="card">
+        <div class="error">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 1rem;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <h3 style="margin-bottom: 0.5rem;">âŒ Error loading data</h3>
+          <p id="error-message"></p>
+          <button onclick="location.reload()" class="btn" style="margin-top: 1.5rem;">
+            Try again
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content" class="card" style="display: none;"></div>
+  </div>
+
+  <script>
+    // Configuration
+    const CONFIG = {
+      RPC: 'https://rpc-amoy.polygon.technology/',
+      EXPLORER: 'https://amoy.polygonscan.com',
+      CONTRACTS: {
+        AnnaAttestation: '0xCd49b6414077AAE8Df7DAeBC41CBfAbF8F93727F',
+        AnnaIdentity: '0xe0Ea79B712fB83ee8A8BD8dCb3c6F1cE39aB0A93'
+      }
+    };
+
+    const ATTESTATION_ABI = [{"inputs":[{"internalType":"bytes32","name":"attestationId","type":"bytes32"}],"name":"getAttestation","outputs":[{"components":[{"internalType":"bytes32","name":"contentHash","type":"bytes32"},{"internalType":"bytes32","name":"reasoningHash","type":"bytes32"},{"internalType":"address","name":"agent","type":"address"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"enum AnnaAttestation.Status","name":"status","type":"uint8"},{"internalType":"uint8","name":"consistencyScore","type":"uint8"},{"internalType":"address","name":"verifier","type":"address"},{"internalType":"uint256","name":"verificationTime","type":"uint256"},{"internalType":"string","name":"category","type":"string"}],"internalType":"struct AnnaAttestation.Attestation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"attestationCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"attestationId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"agent","type":"address"},{"indexed":false,"internalType":"string","name":"category","type":"string"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"AttestationSubmitted","type":"event"}];
+
+    const IDENTITY_ABI = [{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"agentMetadata","outputs":[{"internalType":"string","name":"modelType","type":"string"},{"internalType":"string","name":"modelVersion","type":"string"},{"internalType":"string","name":"specialization","type":"string"},{"internalType":"uint256","name":"registrationTime","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+    let web3, attestationContract, identityContract;
+    let currentTxHash = null; // Store transaction hash
+
+    // Copy to clipboard
+    function copyToClipboard(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalHTML = btn.innerHTML;
+        
+        btn.classList.add('copied');
+        btn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = originalHTML;
+        }, 2000);
+      }).catch(err => {
+        alert('Error copying: ' + err);
+      });
+    }
+
+    // Search attestation
+    function buscarAttestation() {
+      const hash = document.getElementById('hashInput').value.trim();
+      
+      if (!hash) {
+        alert('Please enter a hash');
+        return;
+      }
+      
+      if (!hash.startsWith('0x') || hash.length < 10) {
+        alert('Invalid hash. It must start with 0x');
+        return;
+      }
+
+      window.location.href = `?hash=${hash}`;
+    }
+
+    // Extract hash from URL
+    function getAttestationHash() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashFromQuery = urlParams.get('hash');
+      
+      if (hashFromQuery) return hashFromQuery;
+      
+      const path = window.location.pathname;
+      const match = path.match(/\/verify\/(0x[a-fA-F0-9]+)/);
+      return match ? match[1] : null;
+    }
+
+    // Initialize Web3
+    async function initWeb3() {
+      try {
+        web3 = new Web3(CONFIG.RPC);
+        attestationContract = new web3.eth.Contract(ATTESTATION_ABI, CONFIG.CONTRACTS.AnnaAttestation);
+        identityContract = new web3.eth.Contract(IDENTITY_ABI, CONFIG.CONTRACTS.AnnaIdentity);
+        return true;
+      } catch (error) {
+        console.error("Error initializing Web3:", error);
+        return false;
+      }
+    }
+
+    // Format address
+    function formatAddress(addr) {
+      if (!addr) return 'N/A';
+      return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    }
+
+    // Format date
+    function formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+      const date = new Date(parseInt(timestamp) * 1000);
+      return date.toLocaleString('en-US');
+    }
+
+    // Find transaction hash by searching for AttestationSubmitted event
+    async function findTransactionHash(attestationId) {
+      try {
+        // Normalize attestation ID (ensure it has 0x prefix)
+        const normalizedId = attestationId.startsWith('0x') ? attestationId : '0x' + attestationId;
+        
+        console.log('ðŸ” Searching transaction for attestationId:', normalizedId);
+        
+        // Get current block
+        const latestBlock = await web3.eth.getBlockNumber();
+        const blocksToSearch = 50000; // Last ~50k blocks (~1-2 days on Polygon)
+        const fromBlock = Math.max(0, latestBlock - blocksToSearch);
+        
+        console.log(`ðŸ“¦ Searching blocks ${fromBlock} to ${latestBlock} (last ${blocksToSearch} blocks)`);
+        
+        // Get events from recent blocks only (prevents timeout)
+        const allEvents = await attestationContract.getPastEvents('AttestationSubmitted', {
+          fromBlock: fromBlock,
+          toBlock: 'latest'
+        });
+
+        console.log(`ðŸ“‹ Found ${allEvents.length} AttestationSubmitted events in range`);
+
+        if (allEvents.length === 0) {
+          console.warn('âš ï¸ No events found in recent blocks. Attestation may be older.');
+          return null;
+        }
+
+        // Manually filter for our attestationId (normalize both for comparison)
+        const matchingEvent = allEvents.find(event => {
+          const eventId = event.returnValues.attestationId;
+          const normalizedEventId = eventId.startsWith('0x') ? eventId : '0x' + eventId;
+          return normalizedEventId.toLowerCase() === normalizedId.toLowerCase();
+        });
+
+        if (matchingEvent) {
+          console.log('âœ… Found transaction hash:', matchingEvent.transactionHash);
+          return matchingEvent.transactionHash;
+        }
+        
+        console.warn('âš ï¸ No matching event found. Possible reasons:');
+        console.warn('   - Attestation is older than 50k blocks');
+        console.warn('   - Attestation ID is incorrect');
+        return null;
+      } catch (error) {
+        console.error('âŒ Error finding transaction hash:', error);
+        return null;
+      }
+    }
+
+    // Load attestation
+    async function loadAttestation(attestationId) {
+      try {
+        if (!attestationId.startsWith('0x')) {
+          attestationId = '0x' + attestationId;
+        }
+
+        const attestation = await attestationContract.methods.getAttestation(attestationId).call();
+        
+        if (attestation.agent === '0x0000000000000000000000000000000000000000') {
+          throw new Error('Attestation not found');
+        }
+
+        // Try to find transaction hash
+        currentTxHash = await findTransactionHash(attestationId);
+
+        let agent = null;
+        try {
+          agent = await identityContract.methods.agentMetadata(attestation.agent).call();
+        } catch (e) {
+          console.warn('Error fetching agent metadata:', e);
+        }
+
+        return {
+          attestation: {
+            id: attestationId,
+            ...attestation
+          },
+          agent,
+          verification: {
+            passed: parseInt(attestation.status) === 1,
+            score: attestation.consistencyScore,
+            verifier: attestation.verifier,
+            timestamp: attestation.verificationTime
+          }
+        };
+      } catch (error) {
+        console.error("Error loading attestation:", error);
+        throw error;
+      }
+    }
+
+    // Render content
+    function renderContent(data) {
+      const { attestation, agent, verification } = data;
+      
+      let statusBadge = '';
+      if (verification && verification.verifier !== '0x0000000000000000000000000000000000000000') {
+        if (verification.passed) {
+          statusBadge = `
+            <span class="status-badge status-verified">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+              Verified
+            </span>
+          `;
+        } else {
+          statusBadge = `<span class="status-badge status-failed">âŒ Failed</span>`;
+        }
+      } else {
+        statusBadge = `<span class="status-badge status-pending">â³ Pending</span>`;
+      }
+
+      const content = `
+        <div class="blockchain-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          Polygon Amoy Testnet
+        </div>
+
+        <div class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Attestation Information
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value">${statusBadge}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">ID</div>
+            <div class="info-value hash-value" style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
+              <span style="flex: 1;">${attestation.id.slice(0, 10)}...${attestation.id.slice(-8)}</span>
+              <button onclick="copyToClipboard('${attestation.id}', this)" class="copy-btn" title="Copy full ID">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Category</div>
+            <div class="info-value">${(() => {
+              try {
+                const cat = JSON.parse(attestation.category);
+                return cat.document_type || attestation.category;
+              } catch {
+                return attestation.category || 'N/A';
+              }
+            })()}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Date</div>
+            <div class="info-value">${formatDate(attestation.timestamp)}</div>
+          </div>
+        </div>
+
+        ${(() => {
+          try {
+            const metadata = JSON.parse(attestation.category);
+            if (metadata.external_id || metadata.client_name) {
+              return `
+                <div class="section-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                  </svg>
+                  Metadata
+                </div>
+
+                <div class="info-grid">
+                  ${metadata.external_id ? `
+                    <div class="info-item">
+                      <div class="info-label">External ID</div>
+                      <div class="info-value">${metadata.external_id}</div>
+                    </div>
+                  ` : ''}
+                  
+                  ${metadata.client_name ? `
+                    <div class="info-item">
+                      <div class="info-label">Client</div>
+                      <div class="info-value">${metadata.client_name}</div>
+                    </div>
+                  ` : ''}
+                  
+                  ${metadata.system_origin ? `
+                    <div class="info-item">
+                      <div class="info-label">System</div>
+                      <div class="info-value">${metadata.system_origin}</div>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }
+            return '';
+          } catch {
+            return '';
+          }
+        })()}
+
+        ${agent && agent.modelType ? `
+          <div class="section-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M12.5 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            AI Agent
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Model</div>
+              <div class="info-value">${agent.modelType || 'N/A'}</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Version</div>
+              <div class="info-value">${agent.modelVersion || 'N/A'}</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Address</div>
+              <div class="info-value">
+                <a href="${CONFIG.EXPLORER}/address/${attestation.agent}" target="_blank" style="color: #B19CFF; text-decoration: none;">
+                  ${formatAddress(attestation.agent)}
+                </a>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        ${verification && verification.verifier !== '0x0000000000000000000000000000000000000000' ? `
+          <div class="section-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Verification Result
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Score</div>
+              <div class="info-value">${verification.score}/100</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Verifier</div>
+              <div class="info-value">
+                <a href="${CONFIG.EXPLORER}/address/${verification.verifier}" target="_blank" style="color: #B19CFF; text-decoration: none;">
+                  ${formatAddress(verification.verifier)}
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">Verification Date</div>
+              <div class="info-value">${formatDate(verification.timestamp)}</div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+          </svg>
+          Cryptographic Hashes
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Content Hash</div>
+          <div class="info-value hash-value">${attestation.contentHash}</div>
+        </div>
+
+        <div class="info-item" style="margin-top: 1rem;">
+          <div class="info-label">Reasoning Hash</div>
+          <div class="info-value hash-value">${attestation.reasoningHash}</div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+          ${currentTxHash ? `
+            <a href="${CONFIG.EXPLORER}/tx/${currentTxHash}" target="_blank" class="btn">
+              View Transaction on Polygonscan
+            </a>
+          ` : `
+            <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+              <a href="${CONFIG.EXPLORER}/address/${CONFIG.CONTRACTS.AnnaAttestation}#events" target="_blank" class="btn">
+                View All Contract Events
+              </a>
+              <p style="color: #A1A1AA; font-size: 0.875rem; max-width: 500px;">
+                Transaction not found automatically (may be older than 50k blocks). 
+                Click above to view all events and search for:<br>
+                <code style="background: rgba(106, 90, 255, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all;">
+                  ${attestation.id}
+                </code>
+              </p>
+            </div>
+          `}
+        </div>
+      `;
+
+      document.getElementById('content').innerHTML = content;
+      document.getElementById('content').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // Show error
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // Initialize
+    async function init() {
+      const hash = getAttestationHash();
+      
+      if (!hash) {
+        document.getElementById('search').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('loading').style.display = 'block';
+
+      const web3Ready = await initWeb3();
+      if (!web3Ready) {
+        showError('Error connecting to the blockchain. Try again later.');
+        return;
+      }
+
+      try {
+        const data = await loadAttestation(hash);
+        renderContent(data);
+      } catch (error) {
+        showError(`Error loading attestation: ${error.message}`);
+      }
+    }
+
+    // Background animation
+    (function(){
+      const canvas = document.getElementById('bgCanvas');
+      const scene = new THREE.Scene();
+      const clock = new THREE.Clock();
+      const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 1, 2000);
+      camera.position.z = 420;
+      
+      function resize(){
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const PARTICLE_COUNT = 150, MAX_DIST = 120;
+      const positions = new Float32Array(PARTICLE_COUNT * 3);
+      const basePositions = [], velocities = [];
+      
+      for(let i=0;i<PARTICLE_COUNT;i++){
+        const x = (Math.random()-0.5)*420;
+        const y = (Math.random()-0.5)*240;
+        const z = (Math.random()-0.5)*240;
+        positions[i*3]=x; positions[i*3+1]=y; positions[i*3+2]=z;
+        basePositions.push(new THREE.Vector3(x,y,z));
+        velocities.push(new THREE.Vector3((Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02));
+      }
+
+      const pointsGeom = new THREE.BufferGeometry();
+      pointsGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const pointsMat = new THREE.PointsMaterial({color:0x9F8CFF,size:2.2,opacity:0.9,transparent:true});
+      const points = new THREE.Points(pointsGeom, pointsMat);
+      scene.add(points);
+
+      const tmpV=new THREE.Vector3();
+      function animate(){
+        const t=clock.getElapsedTime();
+        for(let i=0;i<PARTICLE_COUNT;i++){
+          const idx=i*3, base=basePositions[i];
+          tmpV.copy(base);
+          tmpV.x+=Math.sin(t*0.6+i)*6+velocities[i].x*40;
+          tmpV.y+=Math.cos(t*0.5+i*0.7)*5+velocities[i].y*40;
+          tmpV.z+=Math.sin(t*0.4+i*0.9)*6+velocities[i].z*40;
+          positions[idx]=tmpV.x;positions[idx+1]=tmpV.y;positions[idx+2]=tmpV.z;
+        }
+        pointsGeom.attributes.position.needsUpdate=true;
+
+        scene.rotation.y=Math.sin(t*0.05)*0.05;
+        camera.position.z=420+Math.sin(t*0.12)*8;
+        camera.lookAt(0,0,0);
+        renderer.render(scene,camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
